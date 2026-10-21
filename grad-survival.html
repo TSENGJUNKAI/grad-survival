@@ -233,10 +233,6 @@ button.note:hover{transform:rotate(0deg) translateY(-7px) scale(1.03);box-shadow
 .semdots i.over.past{background:var(--red)}
 .goal{font-size:.95rem;margin-top:4px}
 
-.committee{width:min(420px,100%);display:block;margin:6px auto 0}
-.committee .line{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-.bubble{position:relative;max-width:520px;margin:10px auto 0;background:var(--paper);border:2.5px solid var(--ink);border-radius:22px 18px 24px 16px;padding:12px 18px;font-size:1.25rem;font-weight:700;text-align:center}
-.bubble::after{content:"";position:absolute;top:-14px;left:50%;border:12px solid transparent;border-bottom-color:var(--ink);border-top:0;transform:translateX(-50%)}
 .score{display:flex;justify-content:center;gap:10px;margin-top:8px;font-size:1.4rem}
 
 .cert{background:var(--paper);border:3px double var(--ink);outline:2px solid var(--ink);outline-offset:6px;padding:28px 26px;margin:14px auto 0;max-width:640px;text-align:center;position:relative}
@@ -247,6 +243,59 @@ button.note:hover{transform:rotate(0deg) translateY(-7px) scale(1.03);box-shadow
 .cert .stamp{position:absolute;right:18px;top:18px}
 .care{margin-top:14px;font-size:.92rem;background:var(--n-green);display:inline-block;padding:6px 12px;transform:rotate(-1deg)}
 
+/* deck-building cards */
+.hand{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:16px 12px;margin-top:16px}
+.card{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;cursor:pointer;
+  background:var(--c);border:2.5px solid var(--ink);border-radius:10px 6px 12px 7px;padding:18px 8px 8px;min-height:190px;min-width:0;
+  box-shadow:3px 3px 0 var(--ink);transform:rotate(var(--r,0deg));transition:transform .15s ease, box-shadow .15s ease}
+.hand.deal .card{animation:deal .4s cubic-bezier(.2,.9,.3,1.3) backwards;animation-delay:var(--d,0s)}
+.card:hover:not(:disabled){transform:translateY(-8px) rotate(0deg);box-shadow:4px 9px 0 var(--ink)}
+.card:disabled{opacity:.45;cursor:not-allowed}
+.card .cost{position:absolute;top:-11px;left:-11px;width:32px;height:32px;border-radius:50%;background:var(--hl);border:2.5px solid var(--ink);
+  display:grid;place-items:center;font-family:var(--num);font-weight:700;font-size:1.35rem;line-height:1}
+.card .ctype{position:absolute;top:3px;right:8px;font-size:.7rem;color:var(--pencil)}
+.card .ic{width:46px;height:46px}
+.card h4{margin:0;font-size:1.05rem;line-height:1.25}
+.card p{margin:0;font-size:.82rem;line-height:1.35}
+.card p small{color:var(--pencil)}
+.card .warn{color:var(--red)}
+.card .alt{margin-top:auto;padding-top:5px;border-top:1.5px dashed rgba(31,45,74,.28);font-size:.72rem;line-height:1.3;color:var(--pencil);width:100%}
+.hand.mini{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px 8px}
+.hand.mini .card{min-height:160px;cursor:default;box-shadow:2px 2px 0 var(--ink)}
+.energy{display:inline-flex;align-items:baseline;gap:4px;background:var(--hl);border:2.5px solid var(--ink);border-radius:999px;padding:0 12px;font-weight:700;font-size:.9rem}
+.energy b{font-family:var(--num);font-size:1.7rem;line-height:1.1}
+.pilebar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:20px}
+.pilebar .grow{flex:1;min-width:8em}
+.btn.sm{font-size:.9rem;padding:.25em .9em}
+.buff{margin:6px 0 0;color:#7a4cc2;font-weight:700}
+.foes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.foe{display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--paper);border:2.5px solid var(--ink);border-radius:12px 6px 14px 8px;
+  padding:8px 6px;cursor:pointer;font-size:.85rem;min-width:0;text-align:center}
+.foe.sel{background:var(--n-pink);box-shadow:0 0 0 3px var(--red)}
+.foe.dead{opacity:.55;cursor:default}
+.foe.acting{animation:bump .6s ease}
+.foe:disabled{cursor:default}
+.foe svg{width:66px;height:66px}
+.foe svg .line{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.foe .hp{width:100%;height:10px;border:2px solid var(--ink);border-radius:6px;overflow:hidden;background:var(--paper)}
+.foe .hp span{display:block;height:100%;background:repeating-linear-gradient(-45deg,var(--red) 0 4px,transparent 4px 7px);transition:width .4s ease}
+.foe .intent{font-size:.78rem;font-weight:700;color:var(--red);min-height:2.5em;line-height:1.25}
+.blog{margin-top:12px;background:var(--paper);border:2px dashed var(--pencil);padding:8px 12px;min-height:3.4em;font-size:.95rem}
+.mebar{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;margin-top:10px}
+#toasts{position:fixed;z-index:55;left:50%;transform:translateX(-50%);bottom:calc(72px + env(safe-area-inset-bottom, 0px));
+  display:grid;gap:6px;width:min(460px,calc(100% - 32px));pointer-events:none}
+.toast{background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:6px 12px;font-size:.92rem;animation:pop .25s ease;transition:opacity .4s ease, transform .4s ease}
+.toast.out{opacity:0;transform:translateY(8px)}
+.toast .deltas{margin:4px 0 0}
+@media (max-width:520px){
+  .hand{grid-template-columns:repeat(auto-fill,minmax(102px,1fr));gap:14px 8px}
+  .card{min-height:176px;padding:16px 5px 6px}
+  .card .ic{width:36px;height:36px}
+  .card h4{font-size:.95rem}
+  .card p{font-size:.76rem}
+  .foe svg{width:50px;height:50px}
+  .foe{font-size:.75rem}
+}
 .pow{font-family:var(--hand);font-weight:700;font-size:clamp(5rem,22vw,9rem);color:var(--red);line-height:1;
   -webkit-text-stroke:3px var(--ink);text-shadow:6px 6px 0 var(--hl);transform:rotate(-12deg);animation:pow .5s cubic-bezier(.2,1.8,.4,1) backwards}
 @keyframes pow{from{transform:rotate(-30deg) scale(.2);opacity:0}}
@@ -314,6 +363,7 @@ body.quake #app{animation:quake .45s linear 2}
   </main>
 </div>
 <button id="snd" class="snd" aria-pressed="true" title="背景音樂"><svg class="ic" viewBox="0 0 64 64" aria-hidden="true"><path d="M24 46V14l28-6v32"/><circle cx="17" cy="46" r="7"/><circle cx="45" cy="40" r="7"/><path d="M24 22l28-6"/></svg><span>音樂</span></button>
+<div id="toasts" aria-live="polite"></div>
 <div id="modal" class="layer" hidden></div>
 <div id="dice" class="layer" hidden></div>
 
@@ -334,7 +384,7 @@ const store = {
   set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 };
 const META_KEY = 'gradRogue.meta.v1';
-let META = Object.assign({scars:0,unlocked:[],endings:[],runs:0,equip:null,tut:false}, store.get(META_KEY,{}));
+let META = Object.assign({scars:0,unlocked:[],endings:[],runs:0,equip:null,tut2:false}, store.get(META_KEY,{}));
 const saveMeta = () => store.set(META_KEY, META);
 
 class EndGame { constructor(id){ this.id=id; } }
@@ -534,14 +584,14 @@ const PROFS = [
 ];
 
 const RELICS = [
-  {id:'coffee',name:'無限咖啡卡',icon:'coffee',desc:'每學期精神 +4'},
+  {id:'coffee',name:'無限咖啡卡',icon:'coffee',desc:'每回合 ⏳ 時間 +1'},
   {id:'chair',name:'人體工學椅',icon:'chair',desc:'每學期精神 +3，腰不再痛'},
   {id:'cat',name:'實驗室的貓',icon:'cat',desc:'每學期精神 +5'},
   {id:'code',name:'學長的祖傳程式碼',icon:'server',desc:'進度獲得 +20%',field:'cs'},
   {id:'hela',name:'不會死的細胞株',icon:'petri',desc:'進度獲得 +20%',field:'bio'},
   {id:'ai',name:'AI 潤稿訂閱',icon:'paper',desc:'投稿擲骰 +2'},
   {id:'mouth',name:'嘴砲課程結業證書',icon:'mic',desc:'嘴砲 +2',get:()=>S.st.talk+=2},
-  {id:'exam',name:'祖傳考古題',icon:'book',desc:'口試、資格考擲骰 +3'},
+  {id:'exam',name:'祖傳考古題',icon:'book',desc:'口試時每回合冷靜 +4'},
   {id:'grant',name:'獎學金',icon:'money',desc:'每學期存款 +1 萬'},
   {id:'charm',name:'畢業御守',icon:'charm',desc:'所有擲骰 +1'},
   {id:'phones',name:'降噪耳機',icon:'phones',desc:'精神損失 −20%'},
@@ -584,14 +634,14 @@ function newState(){
   return {field:null,school:null,prof:null,st:{skill:5,stamina:5,talk:5,luck:5},
     san:80,favor:50,prog:0,money:5,papers:0,stage:'ms',sem:0,total:0,
     relics:[],perk:META.equip && META.unlocked.includes(META.equip) ? META.equip : null,
-    qual:false,qualFail:0,seen:{},warned:false};
+    qual:false,qualFail:0,seen:{},warned:false,deck:[],nextTemp:[]};
 }
 
 function progMult(){
   let m = S.school.growth * S.prof.prog;
   if(has('code')||has('hela')) m *= 1.2;
-  if(S.stage==='ms') m *= 1.3;
-  if(S.stage==='phd') m *= .7;
+  if(S.stage==='ms') m *= .85;
+  if(S.stage==='phd') m *= .42;
   return m;
 }
 function sanMult(){
@@ -625,11 +675,12 @@ function checkFail(){
 }
 
 /* ================= UI primitives ================= */
-function ui(html, solo=false){
+function ui(html, solo=false, quiet=false){
   const st=$('#stage');
   $('#layout').classList.toggle('solo', solo);
   $('#side').hidden = solo || !(S && S.prof);
   st.innerHTML=html;
+  if(quiet) return;   // redraw in place (playing a card): no page animation, keep scroll
   st.classList.remove('enter'); void st.offsetWidth; st.classList.add('enter');
   window.scrollTo({top:0,behavior:REDUCED?'auto':'smooth'});
 }
@@ -798,8 +849,8 @@ function title(){
     <h2 class="sec-title">怎麼玩</h2>
     <div class="howto">
       <div class="note" style="--r:-1.5deg;--c:var(--n-yellow)">${icon('cap')}<h3>填志願、抽教授</h3><span class="flav">屬性擲骰決定你能上哪間研究所。指導教授靠轉蛋，SSR 機率 10%。</span></div>
-      <div class="note" style="--r:1deg;--c:var(--n-pink)">${icon('paper')}<h3>每學期選兩張卡</h3><span class="flav">寫論文、跟教授 meeting、去墾丁……有些要擲 d20，結果看天。</span></div>
-      <div class="note" style="--r:-.5deg;--c:var(--n-green)">${icon('devil')}<h3>撐過口委和 Reviewer 2</h3><span class="flav">精神、存款或教授好感歸零就提早下車。失敗會留下傷疤，可以解鎖天賦。</span></div>
+      <div class="note" style="--r:1deg;--c:var(--n-pink)">${icon('paper')}<h3>打造你的研究牌組</h3><span class="flav">每回合抽 5 張、用 3 點時間出牌。學期結束挑新卡，也可以丟掉爛牌。教授會塞雜事給你。</span></div>
+      <div class="note" style="--r:-.5deg;--c:var(--n-green)">${icon('devil')}<h3>用牌組打口試</h3><span class="flav">口委各有疑慮值和招式，同一副牌拿來對戰。精神、存款或教授好感歸零就提早下車。</span></div>
     </div>
     <div class="ruled"></div>
     <h2 class="sec-title">結局收集 <span class="muted">${META.endings.length} / ${END_ORDER.length}</span></h2>
@@ -847,6 +898,7 @@ async function chooseField(){
       <div class="note" style="--r:-2deg;--c:var(--paper);cursor:default;opacity:.55;--d:.24s">${icon('ruler')}<h3>物理</h3><span class="flav">推導到一半發現少一個負號</span></div>
     </div>`, true);
   S.field = await clickOnce($('#stage'),'button.note');
+  S.deck = starterDeck();
 }
 
 function admitPct(sc){
@@ -945,7 +997,7 @@ async function gacha(again=false){
   await clickOnce($('#gbtn'),'.btn');
 }
 
-/* ================= actions (the cards you play each semester) ================= */
+/* ================= cards ================= */
 const F = () => FIELDS[S.field];
 
 /* reviewer comments: R1 is nice, R2 is R2, R3 is a wildcard */
@@ -982,99 +1034,129 @@ function reviews(ok){
     : [['Reviewer 1',pick(RV.r1good)],['Reviewer 2',pick(RV.r2bad),'r2'],['Reviewer 3',pick(RV.r3)]];
   return rows.map(r=>`<div class="rv ${r[2]||''}"><b>${r[0]}</b>${r[1]}</div>`).join('');
 }
-const ACTIONS = [
-  {id:'write',t:'寫論文',ic:'paper',f:'打開 Word，盯著游標閃兩小時。',h:['進度↑','精神↓'],st:'MPD',w:4,
-    run:()=>note('寫了三頁，刪了兩頁', pick(['至少檔名從 final.docx 變成 final_v2.docx 了。','你發現最難寫的是 Abstract，第二難的是其他全部。','寫到一半，Word 當掉了。幸好有自動儲存……的上一版。']), gain({prog:rnd(12,18),san:-4}),'paper')},
-  {id:'meet',t:'跟教授 meeting',ic:'prof',f:'帶著 slides 和求生意志。',h:['好感↑','精神?'],dice:'嘴砲',st:'MPD',w:3,
-    run:async()=>{
-      if(S.prof.id==='fly'&&Math.random()<.4) return note('教授在國外',pick(['meeting 改成視訊，網路延遲五秒，你們互相說了二十次「你先說」。','教授在杜拜轉機，視訊畫面只有他的鼻孔。','教授在法國，背景有人在拉手風琴，你什麼都聽不到。']),gain({favor:3,san:-2}),'plane');
-      if(S.prof.id==='zen'&&Math.random()<.4) return note('教授不在',pick(['門上貼了一張紙條：「加油，我相信你。」','教授辦公室的燈沒開，桌上有一層灰。','秘書說教授去爬山了，下個月回來。']),gain({favor:4,san:3}),'beach');
-      const r=await roll('talk',12,'跟教授報告進度');
-      if(r.ok) return note(pick(['教授點頭了！','過關！','教授笑了（罕見）']),`「${pick(S.prof.ok)}」`,gain({favor:10,prog:6}),S.prof.icon);
-      return note(pick(['教授沉默了五秒','空氣凝結了','教授推了推眼鏡']),`「${pick(S.prof.bad)}」`,gain({favor:-6,san:ouch(-8)}),S.prof.icon);
-    }},
-  {id:'submit',t:()=>F().sub,ic:'devil',f:()=>`把稿子丟進 ${F().venue}，祈禱別遇到 Reviewer 2。`,h:['論文↑','精神?'],dice:'腦力',st:'MPD',w:3,
-    run:async()=>{
-      const dc=12+S.school.dc+(S.stage==='phd'?1:S.stage==='pd'?2:0);
-      const r=await roll('skill',dc,`${F().sub}：${F().venue}`,[['教授加持',S.prof.paper],['AI 潤稿',has('ai')?2:0]]);
-      if(r.ok) return note('Accept！', reviews(true)+`<p>${pick(['你把錄取信截圖傳到家族群組，阿嬤問你什麼時候畢業。','教授在群組發了一個讚，這是他今年第一個讚。','你懷疑系統是不是寄錯人了，重新整理了 30 次。','你在研究室大叫，隔壁實驗室以為發生火災。'])}</p>`, gain({papers:1,prog:10,san:6,favor:8}),'paper');
-      return note(pick(['Reject','Major revision（其實是 Reject）','Reviewer 2 出現了']), reviews(false), gain({san:ouch(-11)}),'devil');
-    }},
-  {id:'conf',t:'參加研討會',ic:'mic',f:'茶點好吃，海報很多，大神就在那裡。',h:['腦力↑','存款↓'],dice:'嘴砲',st:'MPD',w:2,
-    run:async()=>{
-      const r=await roll('talk',14,'鼓起勇氣找大神聊天');
-      if(r.ok) return note('交換名片成功！','大神說：「有興趣可以合作。」你把這句話重複講了一個月。',gain({money:-2,skill:1,prog:10,san:4}),'mic');
-      return note('茶點區常客','整場只跟茶點區的阿姨聊天。不過馬卡龍很好吃。',gain({money:-2,skill:1,san:3}),'hotpot');
-    }},
-  {id:'ta',t:'當助教',ic:'book',f:'改考卷、回信、被問「這會考嗎」。',h:['存款↑','精神↓'],st:'MP',w:2,
-    run:()=>note('助教的一學期','學生問了你 47 次「這會考嗎？」你回答了 47 次「會」。',gain({money:2,san:-6}),'book')},
-  {id:'rest',t:'去墾丁放空',ic:'beach',f:'教授以為你在跑實驗。',h:['精神↑↑','好感↓'],st:'MPD',w:3,
-    run:()=>note('海邊三天', pick(['你躺在沙灘上，第一次覺得 p-value 不重要。','手機關機三天。開機後有 87 則 Line，你選擇再關一天。','曬黑了。回實驗室時大家以為你換人了。']), gain({san:rnd(15,22),favor:-4}),'beach')},
-  {id:'night',t:'熬夜衝刺',ic:'coffee',f:'凌晨四點的研究室，只剩你和飲水機。',h:['進度↑↑','精神↓↓'],st:'MPD',w:3,
-    run:()=>note('天亮了','你聽到了早上第一班垃圾車的音樂，然後完成了一個 section。',gain({prog:rnd(22,27),san:-15}),'coffee')},
-  {id:'read',t:'讀論文',ic:'book',f:'讀 20 篇，看懂 2 篇。',h:['腦力↑','精神↓'],st:'MP',w:2,
-    run:()=>note('知識增加了', pick(['讀完 20 篇，發現 3 篇跟你撞題。','你終於看懂當初教授叫你讀的那篇，原來它是錯的。']), gain({skill:1,san:-3}),'book')},
-  {id:'scholar',t:'申請獎學金',ic:'money',f:'寫三千字自傳，證明你很窮又很優秀。',h:['存款?'],dice:'運氣',st:'MP',w:2,
-    run:async()=>{
-      const r=await roll('luck',13,'等評審結果');
-      if(r.ok) return note('獎學金下來了！','今晚的便當可以加滷蛋，而且是兩顆。',gain({money:5,san:3}),'money');
-      return note('感謝您的申請','「申請人非常優秀，但名額有限。」你已經收到第三封一模一樣的信。',gain({san:-3}),'mail');
-    }},
-  {id:'dinner',t:'實驗室聚餐',ic:'hotpot',f:'吃到飽火鍋，教授買單。',h:['精神↑','好感↑'],st:'MPD',w:2,
-    run:()=>note('坐在教授旁邊', '整晚只敢吃白飯。不過教授說你「很穩重」。',gain({san:8,money:-1,favor:4}),'hotpot')},
-  // CS
-  {id:'gpu',t:'跑實驗',ic:'gpu',f:'按下 Enter，祈禱顯卡沒被搶走。',h:['進度↑'],dice:'運氣',fd:'cs',st:'MP',w:3,
-    run:async()=>{
-      const r=await roll('luck',9,'nvidia-smi 有空位嗎？');
-      if(r.ok) return note('Loss 降了！','你對著螢幕鞠了一個躬。',gain({prog:20}),'chart');
-      return note('GPU 被學長佔走了','nvidia-smi 上八張卡全都是他的名字，跑的是 MNIST。',gain({prog:4,san:-5}),'gpu');
-    }},
-  {id:'tune',t:'調參數煉丹',ic:'fire',f:'learning rate 改成 3e-4，玄學。',h:['進度 0~35'],fd:'cs',st:'MP',w:2,
-    run:()=>{ const v=rnd(0,35); return note(v>25?'煉丹成功！':v<6?'煉出一坨 NaN':'有一點點進步', v>25?'你不知道為什麼會變好，但你決定不要問。':v<6?'loss 從 0.3 變成 NaN，再變成 inf。':'把 batch size 從 32 改成 64，準確率漲了 0.2%。', gain({prog:v,san:-2}),'fire'); }},
-  {id:'arxiv',t:'刷 arXiv',ic:'chart',f:'今天新增 312 篇。',h:['腦力↑','精神↓'],fd:'cs',st:'MPD',w:2,
-    run:()=>note('資訊焦慮','你看完了 312 篇的標題，記住了 0 篇。但腦袋似乎變大了一點。',gain({skill:1,san:-4}),'chart')},
-  {id:'deal',t:'接產學案',ic:'money',f:'廠商：「這可以用 AI 解決嗎？」',h:['存款↑','進度↓'],fd:'cs',st:'MPD',w:2,
-    run:()=>note('甲方的需求','他們要一個「什麼都能預測」的模型，下禮拜要 demo。',gain({money:4,prog:-4,favor:5,san:-3}),'money')},
-  {id:'kaggle',t:'參加 Kaggle',ic:'chart',f:'排行榜上的數字會說話。',h:['腦力↑','存款?'],dice:'腦力',fd:'cs',st:'MP',w:2,
-    run:async()=>{
-      const r=await roll('skill',15,'衝排行榜');
-      if(r.ok) return note('拿到銀牌！','履歷上多了一行，還有一點獎金。',gain({money:3,skill:2}),'chart');
-      return note('第 1,487 名','前面 1,486 名都是同一套 ensemble。',gain({san:-4,skill:1}),'chart');
-    }},
-  // Bio
-  {id:'cell',t:'養細胞',ic:'petri',f:'比照顧自己還用心。',h:['進度↑'],dice:'運氣',fd:'bio',st:'MP',w:3,
-    run:async()=>{
-      const r=await roll('luck',9,'打開培養箱');
-      if(r.ok) return note('細胞白白胖胖','長得比你還健康，你很欣慰也有點難過。',gain({prog:18}),'petri');
-      return note('汙染了','培養盤長出一片黴菌，在顯微鏡下其實滿美的。',gain({san:-8}),'petri');
-    }},
-  {id:'mouse',t:'老鼠實驗',ic:'rat',f:'牠們看著你，你也看著牠們。',h:['進度↑↑','精神↓'],fd:'bio',st:'MP',w:3,
-    run:()=>note('被咬了一口','老鼠咬了你的手指，你們互看了三秒，然後各自繼續工作。',gain({prog:24,san:-10}),'rat')},
-  {id:'western',t:'跑 Western',ic:'dna',f:'開獎時間到。',h:['進度 ?'],fd:'bio',st:'MP',w:2,
-    run:()=>{ const v=rnd(1,3);
-      if(v===1) return note('一片空白','底片上什麼都沒有，跟你的腦袋一樣。',gain({san:-6}),'dna');
-      if(v===2) return note('有帶，但是歪的','教授說：「這張先放 supplementary。」',gain({prog:10}),'dna');
-      return note('一條漂亮的帶！','你把它設成手機桌布。',gain({prog:28,san:4}),'dna'); }},
-  {id:'weekend',t:'週末回實驗室換液',ic:'flask',f:'週六早上，你和清潔阿姨很熟。',h:['好感↑','精神↓'],fd:'bio',st:'MP',w:2,
-    run:()=>note('週末也是工作天','清潔阿姨請你吃了一顆橘子。教授剛好路過，看到你在。',gain({prog:8,favor:6,san:-6}),'flask')},
-  {id:'vendor',t:'跟試劑廠商砍價',ic:'money',f:'業務請喝咖啡，你請他打折。',h:['存款↑'],fd:'bio',st:'MPD',w:2,
-    run:()=>note('變成好朋友','拿到一整箱贈品，還有三支免費的 pipette。',gain({money:2,san:2}),'money')},
-  // Postdoc
-  {id:'job',t:'投教職',ic:'office',f:'寄出 40 份 CV，每份都改了學校名稱。',h:['結局?'],dice:'論文',st:'D',w:0,
-    run:async()=>{
-      const r=await roll(null,27,'等待面試通知',[['論文',S.papers*2],['學校名氣',S.school.job],['嘴砲',Math.floor(S.st.talk/2)],['腦力',Math.floor(S.st.skill/3)]]);
-      if(r.ok){ await note('收到聘書了！！','電話那頭說：「歡迎加入我們系。」你掛掉電話後在走廊上跑了一圈。',[], 'office'); throw new EndGame('prof'); }
-      return note('感謝函收集中','收到 23 封信：「您非常優秀，但……」你把它們排成一面牆。',gain({san:ouch(-12)}),'mail');
-    }},
-  {id:'grantw',t:'寫計畫申請經費',ic:'money',f:'把同一個想法包裝成第五種樣子。',h:['存款?'],dice:'嘴砲',st:'D',w:2,
-    run:async()=>{
-      const r=await roll('talk',14,'審查委員會');
-      if(r.ok) return note('計畫通過！','三年經費到手，你終於可以買一張不會晃的椅子。',gain({money:6,san:4}),'money');
-      return note('未獲補助','審查意見：「題目太新」和「題目太舊」同時出現。',gain({san:-6}),'mail');
-    }},
-  {id:'mentor',t:'帶學弟妹',ic:'cap',f:'「學長姐，Git 要怎麼用？」',h:['進度↑','精神↓'],st:'PD',w:2,
-    run:()=>note('傳承','你教了三遍 git push，他們 push 到了 main。',gain({prog:10,san:-4,favor:3}),'cap')}
-];
+/* every card has a semester effect (s) and a defense-battle effect (f).
+   r: start | c | u | r (reward rarity) | x (special, never offered). fd: field-only. ex: exhausts for the rest of the semester/battle.
+   temp: added for one semester only. unplay: can't be played. end: penalty if still in hand when the turn ends. */
+const TYPES = {research:['研究','var(--n-blue)'],talk:['嘴砲','var(--n-yellow)'],rest:['休息','var(--n-green)'],boost:['加速','var(--n-orange)'],chore:['雜事','#e9e4d8'],curse:['負面','#ddd6ea']};
+const CARDS = {
+  write:{n:'寫論文',ic:'paper',t:'research',cost:1,r:'start',s:{prog:8},f:{dmg:6},say:['寫了三頁，刪了兩頁。','檔名從 final 變成 final_v2。','Abstract 終於寫完第一句了。','Word 當掉了，還好有自動儲存……的上一版。']},
+  read:{n:'讀論文',ic:'book',t:'research',cost:1,r:'start',s:{prog:3,draw:1},f:{dmg:4,draw:1},say:['讀了 20 篇，看懂 2 篇。','發現 3 篇跟你撞題。','終於看懂教授叫你讀的那篇，原來它是錯的。']},
+  rest:{n:'耍廢',ic:'beach',t:'rest',cost:1,r:'start',s:{san:8},f:{block:6},say:['躺平看了一小時貓咪影片。','睡了一個好覺，夢到畢業。','教授以為你在跑實驗。']},
+  dodge:{n:'打太極',ic:'mic',t:'talk',cost:1,r:'start',s:{favor:4},f:{block:4,dmg:3},say:['跟教授說「快好了」。','「這部分我們列為未來工作。」','你把「沒做」包裝成「刻意保留」。']},
+  meet:{n:'教授 meeting',ic:'prof',t:'talk',cost:1,r:'start',sdesc:()=>'好感 +6、進度 +4（看教授心情）',f:{dmg:3,all:1},fdesc:'教授幫腔'},
+  submit:{n:'投稿',ic:'devil',t:'research',cost:2,r:'c',sdesc:()=>`🎲 ${F().sub}：成功論文 +1`,f:{dmgFn:()=>4+3*S.papers},fdesc:'每篇論文多 3'},
+  gpu:{n:'跑實驗',ic:'gpu',t:'research',cost:2,r:'start',fd:'cs',s:{prog:[10,22]},f:{dmg:11},say:['loss 降了！你對螢幕鞠了一個躬。','GPU 被學長佔走一半，跑得很慢。','結果出來了，跟 baseline 差 0.01%。']},
+  cell:{n:'養細胞',ic:'petri',t:'research',cost:2,r:'start',fd:'bio',s:{prog:[10,22]},f:{dmg:11},say:['細胞長得白白胖胖。','有一盤汙染了，其他還活著。','細胞比你還健康。']},
+  // common
+  night:{n:'熬夜',ic:'coffee',t:'boost',cost:0,r:'c',s:{energy:2,san:-8},f:{energy:2,san:-5},say:['凌晨四點，只剩你和飲水機。','聽到第一班垃圾車的音樂了。']},
+  coffee:{n:'咖啡',ic:'coffee',t:'boost',cost:0,r:'c',s:{energy:1,san:-2},f:{energy:1},say:['今天第五杯。','手開始抖了，但打字變快了。']},
+  conf:{n:'研討會',ic:'mic',t:'talk',cost:2,r:'c',s:{prog:6,skill:1,money:-1},f:{dmg:5,all:1},say:['跟大神交換了名片。','整場都在茶點區，馬卡龍很好吃。']},
+  ta:{n:'當助教',ic:'book',t:'talk',cost:1,r:'c',s:{money:1,san:-3},f:{block:5},say:['學生問了 47 次「這會考嗎？」','改考卷改到看見幻覺。']},
+  deep:{n:'深度工作',ic:'phones',t:'research',cost:2,r:'c',s:{prog:16,san:-4},f:{dmg:14},say:['手機關機，一口氣寫完一節。','進入心流，回神已經天黑。']},
+  slides:{n:'備份投影片',ic:'paper',t:'boost',cost:1,r:'c',s:{focus:1},f:{block:9},say:['做了 87 頁備份投影片，以防萬一。']},
+  cite:{n:'引用大老論文',ic:'book',t:'talk',cost:1,r:'c',s:{prog:4,favor:2},f:{dmg:10},say:['你引用了教授的論文，教授很開心。']},
+  tidy:{n:'整理桌面',ic:'chair',t:'boost',cost:1,r:'c',s:{draw:2},f:{draw:2},say:['在桌上找到上學期的筆記。']},
+  boba:{n:'珍奶',ic:'boba',t:'rest',cost:0,r:'c',ex:1,s:{san:6},f:{block:4},say:['半糖少冰，人生的光。']},
+  gym:{n:'運動',ic:'gym',t:'rest',cost:1,r:'c',ex:1,s:{san:5,stamina:1},f:{block:7},say:['跑了三圈，喘到不行，腦袋清醒多了。']},
+  mentor:{n:'帶學弟妹',ic:'cap',t:'talk',cost:1,r:'c',s:{prog:6,favor:2,san:-2},f:{dmg:5},say:['教了三遍 git push，他們 push 到了 main。']},
+  tune:{n:'調參煉丹',ic:'fire',t:'research',cost:1,r:'c',fd:'cs',s:{prog:[0,18]},f:{dmg:[0,14]},say:['learning rate 改成 3e-4，玄學。','煉出一坨 NaN。','不知道為什麼變好了，決定不要問。']},
+  arxiv:{n:'刷 arXiv',ic:'chart',t:'research',cost:0,r:'c',fd:'cs',s:{prog:2,draw:1,san:-1},f:{draw:1},say:['今天新增 312 篇，你只看了標題。']},
+  western:{n:'跑 Western',ic:'dna',t:'research',cost:1,r:'c',fd:'bio',s:{prog:[0,18]},f:{dmg:[0,14]},say:['一片空白。','有帶，但是歪的。','一條漂亮的帶！設成手機桌布。']},
+  weekend:{n:'週末換液',ic:'flask',t:'research',cost:1,r:'c',fd:'bio',s:{prog:7,favor:3,san:-3},f:{dmg:7},say:['週六早上，你和清潔阿姨很熟了。']},
+  // uncommon
+  mouse:{n:'老鼠實驗',ic:'rat',t:'research',cost:2,r:'u',fd:'bio',s:{prog:22,san:-6},f:{dmg:17},say:['老鼠咬了你一口，你們互看了三秒。']},
+  cluster:{n:'GPU 叢集',ic:'server',t:'research',cost:2,r:'u',fd:'cs',s:{prog:22,san:-3,money:-1},f:{dmg:17},say:['借到國網中心的時數了！']},
+  collab:{n:'大神合作',ic:'prof',t:'talk',cost:2,r:'u',s:{prog:14,skill:1},f:{dmg:8,all:1},say:['大神回信了，而且是正面的。']},
+  notes:{n:'學長的筆記',ic:'book',t:'research',cost:1,r:'u',s:{prog:9,draw:1},f:{dmg:8,draw:1},say:['學長的字很醜，但內容很神。']},
+  calm:{n:'深呼吸',ic:'cat',t:'rest',cost:1,r:'u',s:{san:5,draw:1},f:{block:8,draw:1},say:['吸氣，吐氣，想像自己已經畢業。']},
+  counter:{n:'拍桌反擊',ic:'fire',t:'talk',cost:2,r:'u',s:{prog:10,favor:-4},f:{dmg:18},say:['你在 meeting 上拍桌了。全場安靜。']},
+  // rare
+  eureka:{n:'頓悟',ic:'question',t:'boost',cost:1,r:'r',ex:1,s:{draw:3,energy:2},f:{draw:3,energy:2},say:['洗澡時突然想通了！']},
+  legacy:{n:'祖傳程式碼',ic:'server',t:'research',cost:0,r:'r',fd:'cs',ex:1,s:{prog:15},f:{dmg:12},say:['學長 2014 年的 code 居然還能跑。']},
+  hela:{n:'不死細胞株',ic:'petri',t:'research',cost:0,r:'r',fd:'bio',ex:1,s:{prog:15},f:{dmg:12},say:['這株細胞比實驗室還老。']},
+  allin:{n:'全力以赴',ic:'fire',t:'research',cost:3,r:'r',s:{prog:35,san:-10},f:{dmg:12,all:1},say:['你燃燒了一整個禮拜。']},
+  nature:{n:'Nature 等級數據',ic:'chart',t:'research',cost:2,r:'r',s:{prog:24},f:{dmg:24},say:['這張圖美到教授想裱框。']},
+  // chores and curses
+  chore:{n:'實驗室雜事',ic:'fridge',t:'chore',cost:1,r:'x',s:{favor:2,san:-1},f:{},end:{sem:{favor:-3},fight:{san:-2}},say:['倒垃圾、換桶裝水、修印表機。']},
+  panic:{n:'慌張',ic:'question',t:'curse',r:'x',unplay:1,temp:1,end:{fight:{san:-3}}},
+  redink:{n:'紅字',ic:'paper',t:'curse',r:'x',unplay:1,temp:1},
+  doubt:{n:'自我懷疑',ic:'devil',t:'curse',r:'x',unplay:1,temp:1,end:{sem:{san:-2}}},
+  // advisor's weekly "requests" (one per semester, depends on advisor type)
+  p_wind:{n:'八樓吹風',ic:'wind',t:'chore',cost:1,r:'x',temp:1,s:{san:-3,favor:4},end:{sem:{favor:-5}},say:['教授打開窗戶：「吹一吹，清醒一下。」']},
+  p_line:{n:'03:12 的訊息',ic:'phone',t:'chore',cost:1,r:'x',temp:1,s:{san:-4,favor:5},end:{sem:{favor:-5}},say:['秒回「好的老師」。']},
+  p_boss:{n:'幫教授報帳',ic:'money',t:'chore',cost:1,r:'x',temp:1,s:{money:1,san:-3},end:{sem:{favor:-5}},say:['發票抬頭又寫錯了。']},
+  p_fly:{n:'機場視訊',ic:'plane',t:'chore',cost:0,r:'x',temp:1,s:{favor:3},end:{sem:{favor:-2}},say:['教授在轉機，畫面只有他的鼻孔。']},
+  p_kind:{n:'教授的珍奶',ic:'boba',t:'rest',cost:0,r:'x',temp:1,s:{san:8},say:['教授：「大家辛苦了。」']},
+  p_god:{n:'Nature 之夢',ic:'prof',t:'research',cost:2,r:'x',temp:1,s:{prog:12,san:-6},end:{sem:{favor:-4}},say:['教授：「兩週內寫出來。」']},
+  p_new:{n:'Tenure 衝刺',ic:'hourglass',t:'research',cost:1,r:'x',temp:1,s:{prog:8,san:-5},end:{sem:{favor:-4}},say:['教授：「我們一起拚！」（他的 tenure）']},
+  p_zen:{n:'找不到教授',ic:'beach',t:'chore',cost:0,r:'x',temp:1,s:{favor:2},say:['門上貼著：「加油，我相信你。」']},
+  job:{n:'投教職',ic:'office',t:'talk',cost:2,r:'x',sdesc:()=>'🎲 寄出 40 份 CV',f:{}}
+};
+const PROF_CARD = {wind:'p_wind',line:'p_line',boss:'p_boss',fly:'p_fly',kind:'p_kind',god:'p_god',new:'p_new',zen:'p_zen'};
+const starterDeck = () => ['write','write','read','rest','rest','dodge','meet','submit', S.field==='cs'?'gpu':'cell', S.field==='cs'?'gpu':'cell'];
+
+CARDS.meet.semFn = async()=>{
+  if(Math.random()<.75) toast('教授 meeting', `「${pick(S.prof.ok)}」`, gain({favor:6,prog:4,san:-2}));
+  else toast('教授 meeting', `「${pick(S.prof.bad)}」`, gain({favor:-2,san:ouch(-6)}));
+};
+CARDS.submit.semFn = async()=>{
+  const dc=14+S.school.dc+(S.stage==='phd'?1:S.stage==='pd'?2:0);
+  const r=await roll('skill',dc,`${F().sub}：${F().venue}`,[['教授加持',S.prof.paper],['AI 潤稿',has('ai')?2:0]]);
+  if(r.ok) return note('Accept！', reviews(true)+`<p>${pick(['你把錄取信截圖傳到家族群組，阿嬤問你什麼時候畢業。','教授在群組發了一個讚，這是他今年第一個讚。','你懷疑系統是不是寄錯人了，重新整理了 30 次。','你在研究室大叫，隔壁實驗室以為發生火災。'])}</p>`, gain({papers:1,prog:10,san:6,favor:8}),'paper');
+  S.nextTemp.push('doubt');
+  return note(pick(['Reject','Major revision（其實是 Reject）','Reviewer 2 出現了']), reviews(false)+'<p class="muted">下學期牌組會混入一張「自我懷疑」。</p>', gain({san:ouch(-9)}),'devil');
+};
+CARDS.job.semFn = async()=>{
+  const r=await roll(null,29,'等待面試通知',[['論文',S.papers*2],['學校名氣',S.school.job],['嘴砲',Math.floor(S.st.talk/2)],['腦力',Math.floor(S.st.skill/3)]]);
+  if(r.ok){ await note('收到聘書了！！','電話那頭說：「歡迎加入我們系。」你掛掉電話後在走廊上跑了一圈。',[], 'office'); throw new EndGame('prof'); }
+  return note('感謝函收集中','收到 23 封信：「您非常優秀，但……」你把它們排成一面牆。',gain({san:ouch(-12)}),'mail');
+};
+
+/* ----- card text ----- */
+const SIGN = v => (v>0?'+':'−')+Math.abs(v);
+const scaleStat = c => (c.f&&c.f.sc) || (c.t==='talk'?'talk':'skill');
+const dmgBonus = c => Math.floor(statVal(scaleStat(c))/3);
+function dmgBase(c){ return c.f.dmgFn ? c.f.dmgFn() : c.f.dmg; }
+function dmgText(c){
+  const b=dmgBase(c), x=dmgBonus(c);
+  return Array.isArray(b) ? `${b[0]+x}~${b[1]+x}` : `${b+x}`;
+}
+function progText(v, st){
+  const m=progMult()*(st&&st.focus?2:1);
+  return Array.isArray(v) ? `${Math.round(v[0]*m)}~${Math.round(v[1]*m)}` : `+${Math.max(1,Math.round(v*m))}`;
+}
+function desc(c, mode, st){
+  const out=[];
+  if(c.unplay) out.push('無法打出');
+  if(mode==='sem'){
+    const s=c.s||{};
+    if(c.sdesc) out.push(c.sdesc());
+    if(s.prog!=null) out.push(`進度 ${progText(s.prog, c.t==='research'?st:null)}`);
+    for(const k of ['san','favor','money','skill','stamina']) if(s[k]) out.push(`${DELTAN[k]} ${SIGN(s[k])}${k==='money'?' 萬':''}`);
+    if(s.energy) out.push(`⏳ +${s.energy}`);
+    if(s.draw) out.push(`抽 ${s.draw} 張`);
+    if(s.focus) out.push('下一張研究卡進度 ×2');
+  } else {
+    const f=c.f||{};
+    if(f.dmg!=null||f.dmgFn) out.push(`疑慮 −${dmgText(c)}${f.all?'（全體）':''}${c.fdesc?`<br><small>${c.fdesc}</small>`:''}`);
+    if(f.block) out.push(`冷靜 +${f.block}`);
+    if(f.energy) out.push(`⏳ +${f.energy}`);
+    if(f.draw) out.push(`抽 ${f.draw} 張`);
+    if(f.san) out.push(`精神 ${SIGN(f.san)}`);
+    if(!out.length) out.push('口試時沒用');
+  }
+  const e=c.end&&c.end[mode];
+  if(e) out.push(`<span class="warn">留在手上：${Object.entries(e).map(([k,v])=>DELTAN[k]+' '+SIGN(v)).join('、')}</span>`);
+  if(c.ex) out.push('<i>消耗</i>');
+  return out.join('<br>');
+}
+function cardHTML(id, i, o={}){
+  const c=CARDS[id], [tn,tc]=TYPES[c.t], mode=o.mode||'sem';
+  const alt = o.both ? `<span class="alt">口試：${desc(c,'fight').replace(/<br>/g,'、')}</span>` : '';
+  return `<button class="card" data-v="${o.v ?? 'c:'+i}" ${o.dis?'disabled':''} style="--c:${tc};--r:${o.r ?? tilt()};--d:${o.d||0}s">
+    ${c.unplay?'':`<span class="cost">${c.cost}</span>`}<span class="ctype">${tn}${c.temp?'・暫時':''}</span>
+    ${icon(c.ic)}<h4>${c.n}</h4><p>${desc(c,mode,o.st)}</p>${alt}</button>`;
+}
 
 /* ================= random events ================= */
 const EVENTS = [
@@ -1084,7 +1166,7 @@ const EVENTS = [
   {id:'ig',ic:'money',t:'大學同學的 IG',x:'大學同學曬了新車，配文：「人生第一桶金 🚗」',o:[
     ['按讚，然後默默關掉手機',()=>note('沒事的','你打開實驗記錄本，在空白處畫了一台車。',gain({san:-6}))]]},
   {id:'senior',ic:'cap',t:'學長畢業了',x:'學長畢業了。實驗室的雜事、報帳、伺服器帳號，現在全部歸你。',o:[
-    ['「好的，交給我」',()=>note('新任實驗室管家','你多了五把鑰匙和一個「網管」的 Line 群組。',gain({san:-8,favor:6}))],
+    ['「好的，交給我」',()=>note('新任實驗室管家','你多了五把鑰匙和一個「網管」的 Line 群組。'+addCard('chore'),gain({san:-4,favor:6}))],
     ['裝死',()=>note('裝死成功？','教授在 meeting 上問：「這些事現在誰在管？」全場看向你。',gain({favor:-6,san:2}))]]},
   {id:'typhoon',ic:'wind',t:'颱風假',x:'全台放颱風假。教授在群組說：「實驗室沒有放假喔。」',o:[
     ['冒著風雨去實驗室',()=>note('落湯雞','雨傘開花了，但教授看到你準時出現。',gain({prog:8,san:-6,favor:5}))],
@@ -1106,7 +1188,7 @@ const EVENTS = [
     ['衝去搶救',async()=>{const r=await roll('stamina',12,'百米衝刺');return r.ok?note('救回來了！','你抱著乾冰站在走廊上，像個英雄。',gain({san:-3,favor:4})):note('來不及了','你站在冰箱前默哀了一分鐘。',gain({prog:-15,san:-6}));}],
     ['接受命運',()=>note('人生就是這樣','你去買了一杯珍奶。',gain({prog:-12,san:-2}))]]},
   {id:'jog',ic:'gym',t:'健康檢查報告',x:'體檢報告上一片紅字。醫生說：「你才幾歲？」',o:[
-    ['開始去跑步',()=>note('跑了三圈','喘到不行，但腦袋清醒多了。',gain({san:6,stamina:1}))],
+    ['開始去跑步',()=>note('跑了三圈','喘到不行，但腦袋清醒多了。'+addCard('gym'),gain({san:6}))],
     ['明天再說',()=>note('明天','明天永遠是明天。',gain({san:-2}))]]},
   {id:'love',ic:'cat',t:'實驗室外面的世界',x:'有人約你週末去看電影。你上次看電影是大學的時候。',o:[
     ['去約會',()=>note('原來外面有陽光','你發現世界上還有不談 baseline 的對話。',gain({san:12,prog:-5}))],
@@ -1119,7 +1201,7 @@ const EVENTS = [
     ['上前搭話',async()=>{const r=await roll('talk',13,'跟 Reviewer 2 聊天');return r.ok?note('他其實人還不錯','聊完之後他說：「你的研究很有趣，誰審的那麼兇？」',gain({san:8,skill:1})):note('他開始現場審你','他從你的名牌字體開始批評，一路講到你的人生規劃。',gain({san:-8}));}],
     ['偷偷把他的蛋糕拿走',()=>note('小小的復仇','你吃掉了他的提拉米蘇。這是你研究所生涯最甜的時刻。',gain({san:10}))]]},
   {id:'boba',ic:'boba',t:'學弟請喝飲料',x:'學弟拿著一杯半糖少冰的珍奶：「學長姐辛苦了。」',o:[
-    ['感動收下',()=>note('人間溫暖','你喝完後多活了一個禮拜。',gain({san:7}))]]},
+    ['感動收下',()=>note('人間溫暖','你喝完後多活了一個禮拜。學弟還多買了一杯讓你帶走。'+addCard('boba'),gain({san:7}))]]},
   // Absurd lab life
   {id:'pickup',ic:'child',t:'安親班的電話',x:'教授：「我在開會，你幫我去安親班接一下小孩，五點前。」現在是四點五十分。',o:[
     ['騎 YouBike 衝過去',async()=>{const r=await roll('stamina',12,'五點前抵達安親班');return r.ok?note('準時抵達！','小孩看著你說：「你是爸爸的奴隸嗎？」',gain({favor:10,san:-4})):note('遲到三分鐘','安親班老師用看嫌疑犯的眼神盤問了你二十分鐘。',gain({favor:2,san:-8}));}],
@@ -1272,7 +1354,7 @@ const EVENTS = [
     ['跟教授報告',()=>note('抓到了','是隔壁實驗室的。教授說你很細心。',gain({favor:6}))],
     ['一起挖',async()=>{const r=await roll('luck',13,'不被發現');return r.ok?note('賺了一點','電費是學校出的。',gain({money:3})):note('被發現了','教授：「……」',gain({favor:-14,money:1}));}]]},
   {id:'legacy',ic:'server',fd:'cs',t:'學長的程式碼',x:'變數名稱叫 a、aa、aaa，檔名叫 final_final_v3_真的最後.py。',o:[
-    ['硬著頭皮讀',()=>note('考古學家','讀懂了。你覺得自己可以去挖恐龍了。',gain({san:-6,skill:1}))]]},
+    ['硬著頭皮讀',()=>note('考古學家','讀懂了。你覺得自己可以去挖恐龍了。'+addCard('legacy'),gain({san:-6,skill:1}))]]},
   // Bio
   {id:'babies',ic:'rat',fd:'bio',t:'老鼠生寶寶了',x:'半夜十二點，動物房通知：你的老鼠生了一窩。',o:[
     ['馬上去處理',()=>note('凌晨的動物房','你數了 11 隻小老鼠，每一隻都比你有精神。',gain({san:-6,prog:6}))],
@@ -1337,35 +1419,127 @@ function semDots(){
 function goalText(){
   if(S.stage==='ms') return `目標：學位進度 100 → 碩士口試（碩二下前完成，最晚碩三下）`;
   if(S.stage==='phd') return !S.qual ? `目標：博二下要考資格考・畢業需要進度 100 且論文 ≥ 2 篇` : `目標：進度 100、論文 ≥ 2 篇 → 博士口試（最晚博七下）`;
-  return `目標：累積論文，投教職。草稿進度滿 100 自動變成一篇論文。`;
-}
-function drawCards(){
-  const pool=ACTIONS.filter(a=>a.st.includes({ms:'M',phd:'P',pd:'D'}[S.stage]) && (!a.fd||a.fd===S.field) && a.w>0);
-  const out=[];
-  if(S.stage==='pd') out.push(ACTIONS.find(a=>a.id==='job'));
-  if(S.stage==='phd' && S.prog>=70 && S.papers<2) out.push(ACTIONS.find(a=>a.id==='submit'));
-  const bag=pool.filter(a=>!out.includes(a));
-  while(out.length<3 && bag.length){
-    const tot=bag.reduce((s,a)=>s+a.w,0); let x=Math.random()*tot;
-    const i=bag.findIndex(a=>(x-=a.w)<0);
-    out.push(bag.splice(i<0?0:i,1)[0]);
-  }
-  return shuffle(out);
+  return `目標：累積論文，打出「投教職」。草稿進度滿 100 自動變成一篇論文。`;
 }
 const val = v => typeof v==='function' ? v() : v;
 
-async function playAction(step){
-  const cards=drawCards();
-  ui(`<div class="sem-head"><h2 class="semname ${step===0?'flip':''}">${semName()}</h2>
-      <span class="steps">行動 ${[0,1].map(i=>`<i class="${i<=step?'on':''}"></i>`).join('')}</span></div>
-    ${semDots()}<p class="goal muted">${goalText()}</p>
-    <div class="cards">${cards.map((a,i)=>`<button class="note" data-i="${i}" style="--r:${tilt()};--c:${NOTE_COLORS[(i+step*2+S.total)%5]};--d:${i*.07}s">
-      ${icon(a.ic)}<h3>${val(a.t)}</h3><span class="flav">${val(a.f)}</span>
-      <span class="tags">${a.dice?`<span class="tag dice">🎲 ${a.dice}</span>`:''}${a.h.map(x=>`<span class="tag">${x}</span>`).join('')}</span></button>`).join('')}</div>`);
-  const i=await clickOnce($('#stage'),'button.note');
-  await cards[+i].run();
-  checkFail();
+function toast(title, text, ds){
+  const t=document.createElement('div'); t.className='toast';
+  t.innerHTML=`<b>${title}</b>${text?`　<span>${text}</span>`:''}${deltaHTML(ds)}`;
+  $('#toasts').appendChild(t);
+  while($('#toasts').children.length>3) $('#toasts').firstChild.remove();
+  setTimeout(()=>t.classList.add('out'),2400);
+  setTimeout(()=>t.remove(),2900);
 }
+
+/* piles: draw / hand / discard / exhaust, plus per-turn energy, focus and block */
+function newPiles(cards){ return {draw:shuffle(cards),discard:[],hand:[],exhaust:[],energy:3,focus:false,block:0,target:0,fresh:true}; }
+function drawN(st,n){
+  for(let i=0;i<n && st.hand.length<10;i++){
+    if(!st.draw.length){ if(!st.discard.length) break; st.draw=shuffle(st.discard); st.discard=[]; }
+    st.hand.push(st.draw.pop());
+  }
+}
+const energyHTML = e => `<span class="energy" title="時間：出牌要花的點數"><b>${e}</b>⏳ 時間</span>`;
+function pileBar(st,label,busy){
+  return `<div class="pilebar"><button class="btn ghost sm" data-v="deck">看牌組（${S.deck.length}）</button>
+    <span class="muted grow">抽牌堆 ${st.draw.length}・棄牌堆 ${st.discard.length}</span>
+    <button class="btn primary" data-v="end" ${busy?'disabled':''}>${label} →</button></div>`;
+}
+function handHTML(st,mode){
+  return `<div class="hand ${st.fresh?'deal':''}">${st.hand.map((id,i)=>{const c=CARDS[id];
+    return cardHTML(id,i,{mode,st,both:mode==='sem',dis:c.unplay||c.cost>st.energy,d:i*.05,r:((i*7)%5-2)*.6+'deg'});}).join('')}</div>`;
+}
+async function showDeck(){
+  const counts={}; S.deck.forEach(id=>counts[id]=(counts[id]||0)+1);
+  await modal(`<h2>你的牌組（${S.deck.length} 張）</h2><p class="muted">每學期開始會把整副牌洗勻。口試也是用同一副牌。</p>
+    <div class="hand mini">${Object.keys(counts).map(id=>cardHTML(id,0,{v:'',both:true,r:'0deg'}).replace('<h4>',`<h4>${counts[id]>1?`<small>×${counts[id]}</small> `:''}`)).join('')}</div>`, ['關閉']);
+}
+
+async function turnLoop(st, mode, B){
+  while(true){
+    if(mode==='sem') renderSem(st); else renderFight(st,B);
+    st.fresh=false;
+    const v=await clickOnce($('#stage'),'[data-v]');
+    if(!v) continue;
+    if(v==='end') return;
+    if(v==='deck'){ await showDeck(); continue; }
+    if(v.startsWith('t:')){ st.target=+v.slice(2); continue; }
+    const i=+v.slice(2), id=st.hand[i], c=CARDS[id];
+    if(!c || c.unplay || c.cost>st.energy) continue;
+    st.energy-=c.cost; st.hand.splice(i,1);
+    (c.ex?st.exhaust:st.discard).push(id);
+    if(mode==='sem'){ await playSem(c,st); checkFail(); }
+    else { await playFight(c,st,B); if(B.foes.every(f=>f.hp<=0)) return; }
+  }
+}
+
+function renderSem(st){
+  ui(`<div class="sem-head"><h2 class="semname ${st.fresh&&st.turn===0?'flip':''}">${semName()}</h2>
+      <span class="muted">${st.turn?'期末':'期中'}</span>${energyHTML(st.energy)}</div>
+    ${semDots()}<p class="goal muted">${goalText()}</p>
+    ${st.focus?'<p class="buff">✦ 專注中：下一張研究卡進度 ×2</p>':''}
+    ${handHTML(st,'sem')}
+    ${pileBar(st, st.turn?'結束這學期':'進入期末')}`, false, !st.fresh);
+}
+async function playSem(c,st){
+  const s=c.s||{};
+  if(s.energy) st.energy+=s.energy;
+  if(s.draw) drawN(st,s.draw);
+  if(c.semFn){ await c.semFn(st); return; }
+  const d={};
+  for(const k of ['san','favor','money','skill','stamina']) if(s[k]) d[k]=s[k];
+  if(s.prog!=null){
+    let p=Array.isArray(s.prog)?rnd(s.prog[0],s.prog[1]):s.prog;
+    if(st.focus && c.t==='research'){ p*=2; st.focus=false; }
+    d.prog=p;
+  }
+  if(s.focus) st.focus=true;
+  toast(c.n, pick(c.say||['']), gain(d));
+}
+async function semesterTurns(){
+  const temps=[PROF_CARD[S.prof.id], ...S.nextTemp]; S.nextTemp=[];
+  const st=newPiles([...S.deck, ...temps]);
+  for(st.turn=0; st.turn<2; st.turn++){
+    st.energy=3+(has('coffee')?1:0); st.fresh=true;
+    drawN(st,5);
+    await turnLoop(st,'sem');
+    for(const id of st.hand){ const c=CARDS[id]; if(c.end&&c.end.sem) toast(`沒處理：${c.n}`,'',gain(c.end.sem)); }
+    st.discard.push(...st.hand); st.hand=[];
+    checkFail();
+  }
+}
+
+/* ----- rewards ----- */
+function pickReward(){
+  const pool=Object.keys(CARDS).filter(id=>['c','u','r'].includes(CARDS[id].r)&&(!CARDS[id].fd||CARDS[id].fd===S.field));
+  const out=[];
+  while(out.length<3){
+    const x=Math.random(), r=x<.08?'r':x<.36?'u':'c';
+    const cand=pool.filter(id=>CARDS[id].r===r&&!out.includes(id));
+    if(cand.length) out.push(pick(cand));
+  }
+  return out;
+}
+async function cardReward(){
+  const opts=pickReward(), canRemove=S.total%2===0;
+  ui(`<div class="scene-h"><h2>這學期學到了什麼？</h2><span class="muted">選一張卡加入牌組。牌組越精實，抽到好牌的機會越高。</span></div>
+    <div class="hand deal">${opts.map((id,i)=>cardHTML(id,i,{v:'a:'+i,both:true,d:i*.08})).join('')}</div>
+    <div class="btns"><button class="btn ghost" data-v="skip">跳過</button>${canRemove?'<button class="btn" data-v="rm">改成整理研究室：丟掉一張卡</button>':''}</div>`);
+  const v=await clickOnce($('#stage'),'[data-v]');
+  if(v.startsWith('a:')){ const id=opts[+v.slice(2)]; S.deck.push(id); toast('加入牌組',CARDS[id].n,[]); }
+  else if(v==='rm') await removeCard();
+}
+async function removeCard(){
+  const list=S.deck.map((id,i)=>[id,i]).filter(([id])=>id!=='job');
+  ui(`<div class="scene-h"><h2>整理研究室</h2><span class="muted">選一張卡丟掉</span></div>
+    <div class="hand">${list.map(([id,i])=>cardHTML(id,i,{v:'r:'+i,both:true})).join('')}</div>
+    <div class="btns"><button class="btn ghost" data-v="skip">算了</button></div>`);
+  const v=await clickOnce($('#stage'),'[data-v]');
+  if(v.startsWith('r:')){ const [id]=S.deck.splice(+v.slice(2),1); toast('丟掉了',CARDS[id].n,[]); }
+}
+function addCard(id){ S.deck.push(id); return `<br><span class="muted">牌組加入「${CARDS[id].n}」</span>`; }
+
 async function randomEvent(){
   const stg={ms:'M',phd:'P',pd:'D'}[S.stage];
   let pool=EVENTS.filter(e=>(!e.fd||e.fd===S.field)&&(!e.pf||e.pf===S.prof.id)&&(!e.st||e.st.includes(stg))&&(!e.c||e.c()));
@@ -1381,7 +1555,7 @@ async function randomEvent(){
 async function semesterEnd(){
   const pd=S.stage==='pd';
   const cost=pd?3:2, inc=(pd?5:S.prof.stipend)+(has('grant')?1:0);
-  const regen=(has('coffee')?4:0)+(has('chair')?3:0)+(has('cat')?5:0);
+  const regen=(has('chair')?3:0)+(has('cat')?5:0);
   const press=S.school.pressure+S.prof.pressure;
   const ds=gain({money:inc-cost, san:regen-press, favor:-S.prof.decay});
   await note(`${semName()} 結束`, `教授在期末說：「${pick(S.prof.idle)}」<br><span class="muted">生活費 −${cost} 萬，${pd?'薪水':'助學金'} +${inc} 萬。${S.school.name}的壓力加上教授的關愛，精神${press-regen>0?'又被磨掉一些':'居然恢復了'}。</span>`, ds, 'hourglass');
@@ -1440,74 +1614,119 @@ const SLAPS = [
   '口委用白板筆在你的投影幕上畫了一個大叉叉。投影幕是學校的。',
   '口委拿起你的論文聞了一下：「有抄襲的味道。」'
 ];
-const DODGE = ['這是一個很好的問題……','這部分我們列為未來工作。','謝謝老師的問題，我也很想知道。','我們換個角度來看這個問題。'];
-function committeeSVG(cm, speaker, moods){
-  const xs=[80,210,340];
-  const face=(i)=>{
-    const x=xs[i], c=cm[i], m=moods[i], on=i===speaker;
-    const eyes = c.id==='sleep' && m<=0 ? `<path class="line" d="M${x-14} 60h8M${x+6} 60h8"/><text x="${x+22}" y="40" style="font:700 14px var(--num);fill:#1f2d4a">z</text>`
-      : c.g ? `<circle class="line" cx="${x-9}" cy="60" r="6"/><circle class="line" cx="${x+9}" cy="60" r="6"/><path class="line" d="M${x-3} 60h6"/>`
-      : `<circle cx="${x-9}" cy="60" r="3" fill="#1f2d4a"/><circle cx="${x+9}" cy="60" r="3" fill="#1f2d4a"/>`;
-    const brows = m<0 ? `<path class="line" style="stroke-width:2.4" d="M${x-16} 48l10 4M${x+16} 48l-10 4"/>` : '';
-    return `<g ${on?'':'opacity=".55"'}>
-      <circle class="line" cx="${x}" cy="62" r="26" style="fill:${on?'#fff0a0':'#fff6ea'}"/>${eyes}${brows}
-      ${c.h?`<path class="line" d="M${x-24} 52q4-20 24-20q20 0 24 20"/>`:`<path class="line" d="M${x-12} 38q12-6 24 0"/>`}
-      ${c.id==='red'?`<path class="line" style="stroke:#d3423a" d="M${x+28} 96l14-26"/>`:''}
-      <path class="line" d="${m>0?`M${x-8} 74q8 7 16 0`:m<0?`M${x-8} 78q8-7 16 0`:`M${x-8} 76h16`}"/>
-      <path class="line" style="fill:#c7cfdd" d="M${x-30} 130q2-38 30-40q28 2 30 40z"/></g>`;
-  };
-  return `<svg class="committee" viewBox="0 0 420 166" style="filter:url(#rough)">
-    ${face(0)}${face(1)}${face(2)}
-    <path class="line" style="fill:#d2b48c" d="M10 118h400v26H10z"/>
-    ${cm.map((c,i)=>`<text x="${xs[i]}" y="160" text-anchor="middle" style="font:700 12px var(--hand);fill:#1f2d4a">${c.name}</text>`).join('')}</svg>`;
+function foeFace(m, acting){
+  const c=m.c, mood = m.hp<=0 ? 1 : acting ? -1 : 0;
+  const eyes = c.id==='sleep' && mood<=0 && !acting ? `<path class="line" d="M24 38h8M40 38h8"/><text x="56" y="18" style="font:700 14px var(--num);fill:#1f2d4a">z</text>`
+    : c.g ? `<circle class="line" cx="27" cy="38" r="6"/><circle class="line" cx="45" cy="38" r="6"/><path class="line" d="M33 38h6"/>`
+    : `<circle cx="27" cy="38" r="3" fill="#1f2d4a"/><circle cx="45" cy="38" r="3" fill="#1f2d4a"/>`;
+  const brows = mood<0 ? `<path class="line" style="stroke-width:2.4" d="M20 26l10 4M52 26l-10 4"/>` : '';
+  return `<svg viewBox="0 0 72 72" style="filter:url(#rough)" aria-hidden="true">
+    <circle class="line" cx="36" cy="40" r="26" style="fill:${m.hp<=0?'#d2edcf':acting?'#ffd4dd':'#fff6ea'}"/>${eyes}${brows}
+    ${c.h?`<path class="line" d="M12 30q4-20 24-20q20 0 24 20"/>`:`<path class="line" d="M24 16q12-6 24 0"/>`}
+    ${c.id==='red'?`<path class="line" style="stroke:#d3423a" d="M62 70l8-20"/>`:''}
+    <path class="line" d="${mood>0?'M28 52q8 7 16 0':mood<0?'M28 56q8-7 16 0':'M28 54h16'}"/></svg>`;
 }
-async function slap(text){
+async function pow(){
   const L=$('#dice');
   L.innerHTML=`<div class="box"><div class="pow">啪！</div></div>`;
   L.hidden=false; document.body.classList.add('quake');
   Sound.chime(false);
-  await wait(REDUCED?200:900);
+  await wait(REDUCED?200:850);
   document.body.classList.remove('quake'); L.hidden=true;
-  return note('口委暴走了', text, gain({san:ouch(-6)}), 'prof');
+}
+function planIntent(m,B){
+  const a=B.atk;
+  switch(m.c.id){
+    case 'sleep': return Math.random()<.5?{k:'sleep',txt:'💤 睡著了'}:{k:'atk',dmg:a,txt:`驚醒提問 ${a}`};
+    case 'self': return Math.random()<.35?{k:'heal',amt:5,txt:'講自己的研究：疑慮 +5'}:{k:'atk',dmg:a,txt:`提問 ${a}`};
+    case 'name': return {k:'atk',dmg:a-1,add:'panic',txt:`叫錯名字 ${a-1}＋塞「慌張」`};
+    case 'sowhat': return {k:'atk',dmg:a-2+m.stack,txt:`所以呢？ ${a-2+m.stack}（越問越痛）`};
+    case 'red': return {k:'atk',dmg:a-2,add:'redink',txt:`紅筆圈錯 ${a-2}＋塞「紅字」`};
+    case 'big': { const d=Math.round(a*1.3); return {k:'atk',dmg:d,txt:`大老的質疑 ${d}`}; }
+    case 'gentle': { const d=Math.max(2,Math.round(a*.45)); return {k:'atk',dmg:d,hits:3,txt:`「一個小問題」${d}×3`}; }
+    case 'hot': return m.charged?{k:'slap',dmg:a*2+2,txt:`拍桌暴走 ${a*2+2}！`}:{k:'charge',txt:'情緒醞釀中……'};
+  }
+  return {k:'atk',dmg:a,txt:`提問 ${a}`};
+}
+function renderFight(st,B){
+  const busy=B.acting>=0;
+  ui(`<div class="sem-head"><h2>${B.cfg.n}</h2><span class="muted">第 ${B.turn} / 8 回合</span>${energyHTML(st.energy)}</div>
+    <div class="foes">${B.foes.map((m,i)=>`<button class="foe ${i===st.target&&m.hp>0?'sel':''} ${m.hp<=0?'dead':''} ${B.acting===i?'acting':''}" data-v="t:${i}" ${m.hp<=0||busy?'disabled':''}>
+      ${foeFace(m,B.acting===i)}<b>${m.c.name}</b>
+      <span class="hp"><span style="width:${m.hp/m.max*100}%"></span></span><small>疑慮 ${m.hp} / ${m.max}</small>
+      <span class="intent">${m.hp>0?m.intent.txt:'✓ 簽名了'}</span></button>`).join('')}</div>
+    <div class="blog">${B.log}</div>
+    <div class="mebar"><span>精神 <b class="num">${S.san}</b></span><span>🛡 冷靜 <b class="num">${st.block}</b></span><span class="muted">冷靜會先吸收口委的傷害；點口委可以換目標</span></div>
+    ${handHTML(st,'fight')}
+    ${pileBar(st,'結束回合',busy)}`, false, !st.fresh);
+}
+function aliveTarget(st,B){
+  if(!B.foes[st.target] || B.foes[st.target].hp<=0) st.target=B.foes.findIndex(f=>f.hp>0);
+  return B.foes[st.target];
+}
+async function playFight(c,st,B){
+  const f=c.f||{};
+  const bits=[];
+  if(f.energy){ st.energy+=f.energy; bits.push(`⏳ +${f.energy}`); }
+  if(f.draw){ drawN(st,f.draw); bits.push(`抽 ${f.draw} 張`); }
+  if(f.block){ st.block+=f.block; bits.push(`冷靜 +${f.block}`); }
+  if(f.san) gain({san:f.san});
+  if(f.dmg!=null||f.dmgFn){
+    const targets=f.all?B.foes.filter(x=>x.hp>0):[aliveTarget(st,B)];
+    for(const m of targets){
+      const b=dmgBase(c), d=(Array.isArray(b)?rnd(b[0],b[1]):b)+dmgBonus(c);
+      m.hp=Math.max(0,m.hp-d);
+      bits.push(`${m.c.name} 疑慮 −${d}`);
+      if(m.hp===0){ bits.push(`<b>${m.c.name}：${pick(m.c.ok)}</b>`); Sound.chime(true); }
+    }
+  }
+  B.log=`<b>${c.n}</b>　${bits.join('，')||'沒有效果'}`;
+}
+async function foeAct(m,i,st,B){
+  const it=m.intent; B.acting=i;
+  let line;
+  if(it.k==='sleep') line=`${m.c.name}：（打呼）`;
+  else if(it.k==='charge'){ m.charged=true; line=`${m.c.name}慢慢站了起來，雙手撐在桌上……`; }
+  else if(it.k==='heal'){ m.hp=Math.min(m.max,m.hp+it.amt); line=`${m.c.name}：「${pick(m.c.q)}」<br><span class="muted">開始講自己的研究，疑慮 +${it.amt}</span>`; }
+  else {
+    let total=0;
+    for(let h=0;h<(it.hits||1);h++){ let d=it.dmg; const b=Math.min(st.block,d); st.block-=b; total+=d-b; }
+    if(it.k==='slap'){ m.charged=false; renderFight(st,B); await pow(); line=pick(SLAPS); }
+    else line=`${m.c.name}：「${pick(m.c.q)}」`;
+    const ds = total>0 ? gain({san:ouch(-total)}) : [];
+    line += ds.length ? `<br><span class="muted">精神 ${ds[0][1]}</span>` : '<br><span class="muted">被你的冷靜擋下來了</span>';
+    if(it.add){ st.discard.push(it.add); line+=`<span class="muted">，牌組混入「${CARDS[it.add].n}」</span>`; }
+    if(m.c.id==='sowhat') m.stack++;
+  }
+  B.log=line; renderFight(st,B);
+  await wait(REDUCED?300:1400);
+  B.acting=-1;
 }
 async function boss(kind){
-  const cfg={ms:{n:'碩士學位口試',dc:10},qual:{n:'博士資格考',dc:12},phd:{n:'博士學位口試',dc:13}}[kind];
-  const dc=cfg.dc+S.school.dc;
+  const cfg={ms:{n:'碩士學位口試',hp:13,atk:4},qual:{n:'博士資格考',hp:16,atk:5},phd:{n:'博士學位口試',hp:20,atk:6}}[kind];
   const cm=shuffle(COMMITTEE).slice(0,3);
   await modal(`<p class="muted">BOSS</p><h2>${cfg.n}</h2><p>今天的口試委員：</p>
     <ul>${cm.map(c=>`<li><b>${c.name}</b>：${c.intro}</li>`).join('')}</ul>
-    <p class="muted">三位委員輪流發問，答對兩題就過關。答題方式決定擲骰用哪個屬性。</p>`, ['深呼吸，上吧'], false, 'prof');
-  const general=shuffle([...QS.all,...QS[S.field]]);
-  let win=0, lose=0;
-  const moods=[0,0,0];
-  for(let q=0;q<3 && win<2 && lose<2;q++){
-    const c=cm[q];
-    const question = Math.random()<.6 ? pick(c.q) : general[q];
-    ui(`<div class="scene-h"><h2>${cfg.n}</h2><span class="muted">第 ${q+1} 題</span></div>
-      ${committeeSVG(cm,q,moods)}
-      <div class="bubble"><small class="muted">${c.name}</small><br>「${question}」</div>
-      <div class="score">${'⭕'.repeat(win)}${'❌'.repeat(lose)}${'・'.repeat(3-win-lose)}</div>
-      <div class="cards">
-        <button class="note" data-v="skill" style="--r:${tilt()};--c:var(--n-blue)">${icon('book')}<h3>認真回答</h3><span class="flav">${pick(['用實力說話。','翻開備份投影片第 87 頁。','深吸一口氣，從頭解釋。'])}</span><span class="tags"><span class="tag dice">🎲 腦力 ${S.st.skill}</span></span></button>
-        <button class="note" data-v="talk" style="--r:${tilt()};--c:var(--n-yellow);--d:.07s">${icon('mic')}<h3>打太極</h3><span class="flav">「${pick(DODGE)}」</span><span class="tags"><span class="tag dice">🎲 嘴砲 ${S.st.talk}</span></span></button>
-        <button class="note" data-v="favor" style="--r:${tilt()};--c:var(--n-pink);--d:.14s">${icon('prof')}<h3>轉頭看教授</h3><span class="flav">${pick(['用眼神求救。','用摩斯密碼眨眼。','假裝咳嗽，暗示教授出手。'])}</span><span class="tags"><span class="tag dice">🎲 教授好感 ${Math.floor(S.favor/10)}</span></span></button>
-      </div>`);
-    const how=await clickOnce($('#stage'),'button.note');
-    const r=await roll(how,dc,`回答${c.name}`,[['考古題',has('exam')?3:0]]);
-    if(r.ok){
-      win++; moods[q]=1;
-      const prof = how==='favor' ? `教授幫你擋下來：「${pick(['這部分我們之後會補。','這是我叫他這樣做的。','這個問題很好，我們下次合作一起研究。'])}」<br>` : '';
-      await note(r.crit?'完美回答！':'過了！', prof+pick(c.ok), r.crit?gain({san:5}):[], 'cap');
-    } else {
-      lose++; moods[q]=-1;
-      const prof = how==='favor' ? `${pick(['教授正在滑手機，沒看到你的眼神。','教授假裝在做筆記，其實在畫圈圈。','教授也轉頭，看向窗外。'])}<br>` : '';
-      await note(r.fumble?'大失敗……':'糟了', prof+pick(c.bad), gain({san:ouch(-6)}), 'prof');
-      checkFail();
-      if(r.fumble || Math.random()<.4){ await slap(pick(SLAPS)); checkFail(); }
-    }
+    <p class="muted">用你的牌組應戰：把三位委員的「疑慮」都打到 0 就過關。每位委員頭上會顯示他下一步要做什麼。撐過 8 回合還沒說服他們，或是精神歸零，就要延畢。</p>`, ['深呼吸，上吧'], false, 'prof');
+  const hp=cfg.hp+Math.max(0,S.school.dc)*2;
+  const B={cfg,turn:0,acting:-1,atk:cfg.atk+Math.floor(Math.max(0,S.school.dc)/2),log:'口試開始。三位委員正在翻你的論文。',
+    foes:cm.map(c=>{const mx=Math.round(hp*(c.id==='big'?1.4:1)); return {c,hp:mx,max:mx,stack:0,charged:false,intent:null};})};
+  const st=newPiles(S.deck.filter(id=>id!=='job'));
+  for(B.turn=1;B.turn<=8;B.turn++){
+    B.foes.forEach(m=>{ if(m.hp>0) m.intent=planIntent(m,B); });
+    st.energy=3+(has('coffee')?1:0); st.block=has('exam')?4:0; st.fresh=true;
+    drawN(st,5);
+    await turnLoop(st,'fight',B);
+    if(B.foes.every(f=>f.hp<=0)) break;
+    for(const id of st.hand){ const c=CARDS[id]; if(c.end&&c.end.fight) gain(c.end.fight); }
+    st.discard.push(...st.hand); st.hand=[];
+    for(let i=0;i<3;i++){ if(B.foes[i].hp>0 && S.san>0) await foeAct(B.foes[i],i,st,B); }
+    if(S.san<=0) break;
   }
-  const pass=win>=2;
-  if(pass){ await modal(`<h2>恭喜通過${cfg.n}！</h2><p>${pick(['委員們在單子上簽了名。你走出口試教室時，學弟妹已經準備好蛋糕和氣球。','三位委員簽了名，其中一位是在睡夢中簽的。','你走出教室，發現自己的頭髮又少了幾根，但手上多了一張簽名單。'])}</p>${deltaHTML(gain({skill:1,san:10,favor:5}))}`,['太好了'],false,'cap'); }
+  const pass=B.foes.every(f=>f.hp<=0);
+  if(pass) await modal(`<h2>恭喜通過${cfg.n}！</h2><p>${pick(['委員們在單子上簽了名。你走出口試教室時，學弟妹已經準備好蛋糕和氣球。','三位委員簽了名，其中一位是在睡夢中簽的。','你走出教室，發現頭髮又少了幾根，但手上多了一張簽名單。'])}</p>${deltaHTML(gain({skill:1,san:10,favor:5}))}`,['太好了'],false,'cap');
+  else if(S.san<=0){ S.san=30; refresh(['san']); await note('你在台上當機了','腦袋一片空白，委員們互看一眼，在單子上寫下「建議修改後再議」。',[],'prof'); }
+  else await note('時間到','委員：「我們今天先到這裡，你回去再想想。」',[],'prof');
   return pass;
 }
 
@@ -1516,7 +1735,7 @@ async function milestones(){
   if(S.stage==='ms'){
     if(S.prog>=100 && S.sem>=3){
       const ok=await boss('ms');
-      if(!ok){ await note('口試沒過','委員要求大修，你得延畢一學期。',gain({prog:-20,san:-10})); checkFail(); }
+      if(!ok){ await note('口試沒過','委員要求大修，你得延畢一學期。',gain({prog:-20,san:-5})); checkFail(); }
       else {
         await relicPick('畢業禮物');
         const c=await modal(`<h2>碩士畢業了！</h2><p>接下來呢？</p>`, ['繼續讀博士（同一位教授）','讀博士，但換一位教授（重新轉蛋）','去竹科上班'], true, 'cap');
@@ -1539,12 +1758,13 @@ async function milestones(){
       if(S.papers<2){ if(!S.paperWarn){ S.paperWarn=true; await note('論文不夠','學位進度滿了，但畢業門檻是兩篇論文。快去投稿！',[],'paper'); } }
       else {
         const ok=await boss('phd');
-        if(!ok){ await note('口試沒過','委員要求再補一章，延畢一學期。',gain({prog:-20,san:-10})); checkFail(); }
+        if(!ok){ await note('口試沒過','委員要求再補一章，延畢一學期。',gain({prog:-20,san:-5})); checkFail(); }
         else {
           await relicPick('博士畢業禮物');
           const c=await modal(`<h2>你是博士了！</h2><p>名片上終於可以印 Ph.D.。接下來呢？</p>`, ['去當博士後研究員，挑戰教職','去業界'], true, 'cap');
           if(c===1) throw new EndGame('drind');
-          S.stage='pd'; S.sem=0; S.prog=0; renderHud(); refresh();
+          S.stage='pd'; S.sem=0; S.prog=0; S.deck.push('job'); renderHud(); refresh();
+          await note('博士後研究員','牌組加入一張「投教職」。抽到時打出它就能挑戰教職，論文越多越容易成功。',[],'office');
           return;
         }
       }
@@ -1560,13 +1780,17 @@ async function milestones(){
 async function play(){
   renderHud(); refresh();
   if(S.perk==='legacy') await relicPick('學長的遺產');
-  if(!META.tut){ META.tut=true; saveMeta(); await modal(`<h2>開學了！</h2><p>每學期選 <b class="hl">兩張卡</b>，之後可能會有突發事件。</p><p>左邊的小人就是你：頭髮越少，精神越差。<b>精神、存款、教授好感</b>任何一個歸零，人生就提早結束。</p>`,['我準備好了'],false,'cap'); }
+  if(!META.tut2){ META.tut2=true; saveMeta(); await modal(`<h2>開學了！</h2>
+    <p>你的研究生活是一副 <b class="hl">牌組</b>。每學期分成期中、期末兩回合，每回合抽 5 張牌，有 3 點 ⏳ 時間可以出牌。</p>
+    <p>學期結束可以挑一張新卡加入牌組。<b>口試也是用同一副牌對戰</b>，所以每張卡下面都會寫它在口試時的效果。</p>
+    <p>小心「雜事」卡：留在手上沒處理，教授好感會下降。左邊的小人就是你：頭髮越少，精神越差。<b>精神、存款、教授好感</b>任何一個歸零，人生就提早結束。</p>`,['我準備好了'],false,'cap'); }
   while(true){
     S.sem++; S.total++;
     refresh();
-    for(let step=0;step<2;step++) await playAction(step);
-    if(Math.random()<.8) await randomEvent();
-    if(Math.random()<.25) await randomEvent();
+    await semesterTurns();
+    if(Math.random()<.75) await randomEvent();
+    if(Math.random()<.2) await randomEvent();
+    await cardReward();
     await semesterEnd();
     await milestones();
   }
