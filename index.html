@@ -1,0 +1,1202 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}</style>
+</head>
+<body>
+<title>研究所求生記</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Caveat:wght@600;700&display=swap">
+<style>
+/* layout: a graph-paper lab notebook — left margin column holds the doodled student, the right page is a desk of sticky notes */
+:root{
+  color-scheme: light;
+  --paper:#fbfcf8;
+  --grid:#dde7f0;
+  --margin:#ef9f99;
+  --ink:#1f2d4a;
+  --pencil:#67718a;
+  --red:#d3423a;
+  --hl:#ffe45c;
+  --n-yellow:#fff0a0;
+  --n-pink:#ffd4dd;
+  --n-green:#d2edcf;
+  --n-blue:#d2e3ff;
+  --n-orange:#ffdcb8;
+  --shadow:rgba(31,45,74,.32);
+  --hand:"LXGW WenKai TC","Kaiti TC","BiauKai","DFKai-SB","STKaiti",serif;
+  --num:"Caveat","LXGW WenKai TC",cursive;
+}
+html,body{height:100%}
+body{
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;
+  color:var(--ink);font-family:var(--hand);font-size:17px;line-height:1.6;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+button{font:inherit;color:inherit}
+#app{max-width:1120px;margin:0 auto;padding-block:16px 48px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));}
+
+/* ---------- shared doodle bits ---------- */
+.ic{width:72px;height:72px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;filter:url(#rough);overflow:visible}
+.ic text{stroke:none;fill:currentColor;font-family:var(--num);font-weight:700}
+.ic.sm{width:30px;height:30px;stroke-width:3.2}
+.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,transparent 92%);padding:0 .15em}
+.muted{color:var(--pencil)}
+.num{font-family:var(--num);font-weight:700;font-size:1.25em;line-height:1}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+
+.btn{
+  display:inline-flex;align-items:center;gap:.4em;cursor:pointer;
+  background:var(--paper);border:2.5px solid var(--ink);
+  border-radius:255px 18px 225px 18px/18px 225px 18px 255px;
+  padding:.45em 1.2em;font-size:1.05rem;font-weight:700;
+  box-shadow:3px 3px 0 var(--ink);transition:transform .12s, box-shadow .12s;
+}
+.btn:hover{transform:translate(-1px,-2px);box-shadow:4px 5px 0 var(--ink)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.btn.primary{background:var(--hl)}
+.btn.ghost{box-shadow:none;border-style:dashed}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn:focus-visible,.note:focus-visible,.chip:focus-visible{outline:3px dashed var(--red);outline-offset:4px}
+
+/* sticky notes */
+.note{
+  position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:6px;
+  background:var(--c,var(--n-yellow));border:none;text-align:left;cursor:pointer;
+  padding:22px 16px 16px;min-width:0;
+  box-shadow:0 1px 1px rgba(31,45,74,.08),0 10px 16px -10px var(--shadow);
+  transform:rotate(var(--r,0deg));transition:transform .2s ease, box-shadow .2s ease;
+  animation:deal .45s cubic-bezier(.2,.9,.3,1.3) backwards;animation-delay:var(--d,0s);
+}
+.note::before{content:"";position:absolute;top:-9px;left:50%;width:66px;height:20px;
+  transform:translateX(-50%) rotate(-3deg);background:rgba(255,255,255,.6);border:1px solid rgba(31,45,74,.07)}
+button.note:hover{transform:rotate(0deg) translateY(-7px) scale(1.03);box-shadow:0 2px 2px rgba(31,45,74,.08),0 18px 22px -12px var(--shadow)}
+.note h3{font-size:1.3rem}
+.note .flav{font-size:.95rem;color:var(--ink);opacity:.85;line-height:1.45}
+.note .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto;padding-top:4px}
+.tag{font-size:.78rem;border:1.5px solid currentColor;border-radius:999px;padding:0 8px;color:var(--pencil);white-space:nowrap}
+.tag.dice{color:var(--red);border-style:dashed}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:22px 18px;margin-top:18px}
+@keyframes deal{from{opacity:0;transform:translateY(40px) rotate(12deg) scale(.9)}}
+
+.stamp{display:inline-block;font-weight:700;color:var(--red);border:3px solid var(--red);border-radius:6px;
+  padding:0 12px;font-size:1.6rem;letter-spacing:.08em;transform:rotate(-10deg);animation:stamp .32s cubic-bezier(.3,1.6,.5,1) backwards;
+  mix-blend-mode:multiply;opacity:.92}
+.stamp.good{color:#2f7d4a;border-color:#2f7d4a}
+@keyframes stamp{from{transform:rotate(-10deg) scale(2.4);opacity:0}}
+
+/* ---------- layout ---------- */
+#hud{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 18px;margin-bottom:14px}
+.brand{font-weight:700;font-size:1.25rem;cursor:pointer;background:none;border:none;padding:0}
+.track{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.95rem}
+.track .stg{color:var(--pencil)}
+.track .stg.now{color:var(--ink);font-weight:700}
+.track .stg.done{text-decoration:line-through;text-decoration-color:var(--red);text-decoration-thickness:2px}
+.track .arrow{color:var(--pencil)}
+#layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:28px;align-items:start}
+#layout.solo{grid-template-columns:minmax(0,1fr)}
+#side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);border-right:2px solid var(--margin);padding-right:20px}
+#stage{min-width:0}
+#stage.enter{animation:pageIn .4s ease backwards}
+@keyframes pageIn{from{opacity:0;transform:translateX(18px) rotate(.6deg)}}
+
+/* character + stats */
+.char{width:100%;max-width:210px;display:block;margin:0 auto}
+.char .line{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.who{text-align:center;font-size:.95rem;margin:2px 0 10px}
+.bars{display:grid;gap:6px}
+.bar{display:grid;grid-template-columns:4.6em 1fr 2.4em;align-items:center;gap:6px;font-size:.92rem}
+.bar .trk{height:14px;border:2px solid var(--ink);border-radius:8px 3px 8px 3px;overflow:hidden;background:var(--paper)}
+.bar .fill{height:100%;background:repeating-linear-gradient(-45deg,var(--bc) 0 4px,transparent 4px 7px);border-right:2px solid var(--ink);transition:width .5s ease}
+.bar .v{font-family:var(--num);font-weight:700;font-size:1.15rem;text-align:right;font-variant-numeric:tabular-nums}
+.bump{animation:bump .5s ease}
+@keyframes bump{40%{transform:scale(1.08);background:var(--hl)}}
+.counts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.count{border:2px dashed var(--grid);border-radius:6px;padding:2px 8px;display:flex;justify-content:space-between;align-items:baseline;font-size:.92rem}
+.attrs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px;text-align:center;font-size:.82rem}
+.attrs b{display:block;font-family:var(--num);font-size:1.4rem;line-height:1}
+.side-sec{margin-top:14px;font-size:.88rem}
+.side-sec h4{margin:0 0 4px;font-size:.88rem;color:var(--pencil);letter-spacing:.06em}
+.relics{display:flex;flex-wrap:wrap;gap:4px}
+.relic{width:38px;height:38px;border:2px solid var(--ink);border-radius:50% 45% 50% 40%;display:grid;place-items:center;background:var(--n-blue);cursor:help}
+.profchip{display:flex;align-items:center;gap:8px;background:var(--n-pink);padding:6px 8px;transform:rotate(-1deg)}
+.profchip .ic{width:34px;height:34px;flex:none}
+
+/* modal + dice */
+.layer{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(31,45,74,.38);
+  padding:max(16px, env(safe-area-inset-top,0px)) max(16px, env(safe-area-inset-right,0px)) max(16px, env(safe-area-inset-bottom,0px)) max(16px, env(safe-area-inset-left,0px));
+  animation:fade .2s ease}
+@keyframes fade{from{opacity:0}}
+.page{
+  position:relative;width:min(560px,100%);max-height:100%;overflow:auto;
+  background-color:var(--paper);
+  background-image:linear-gradient(90deg,transparent 46px,var(--margin) 46px,var(--margin) 48px,transparent 48px),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:100% 100%,24px 24px,24px 24px;
+  padding:26px 24px 22px 66px;box-shadow:0 20px 40px -12px rgba(31,45,74,.5);
+  transform:rotate(-.6deg);animation:pop .3s cubic-bezier(.2,1.2,.4,1) backwards;
+}
+@keyframes pop{from{transform:rotate(-4deg) scale(.85);opacity:0}}
+.page .pic{position:absolute;left:4px;top:22px;width:38px;height:38px}
+.page h2{font-size:1.5rem;margin-bottom:6px}
+.page p{margin:6px 0}
+.deltas{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
+.delta{font-weight:700;border:2px solid currentColor;padding:0 10px;border-radius:12px 4px 12px 4px;font-size:.98rem;background:var(--paper)}
+.delta.up{color:#2f7d4a}.delta.down{color:var(--red)}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.btns.col{flex-direction:column;align-items:stretch}
+.btns.col .btn{justify-content:flex-start;text-align:left}
+
+#dice .box{display:grid;justify-items:center;gap:6px;text-align:center;color:var(--paper);width:min(360px,100%)}
+#dice .label{font-size:1.25rem;font-weight:700}
+.d20{width:150px;height:150px;fill:var(--paper);stroke:var(--ink);stroke-width:3;stroke-linejoin:round;filter:url(#rough)}
+.d20 .inner{fill:var(--n-yellow)}
+.d20 text{font-family:var(--num);font-size:40px;font-weight:700;fill:var(--ink);stroke:none}
+.d20.spin{animation:spin .9s cubic-bezier(.3,.6,.4,1)}
+@keyframes spin{0%{transform:rotate(0) scale(.6)}60%{transform:rotate(600deg) scale(1.1)}100%{transform:rotate(720deg) scale(1)}}
+.mods{font-size:.95rem;opacity:.95}
+.need{font-size:1.05rem;background:var(--paper);color:var(--ink);padding:0 10px;border-radius:4px}
+#dice .stamp{background:var(--paper);font-size:2rem}
+.tap{font-size:.8rem;opacity:.7}
+
+/* ---------- scenes ---------- */
+.cover{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:28px;align-items:center;padding:18px 0 8px}
+.cover h1{font-size:clamp(2.6rem,7vw,4.4rem);letter-spacing:.04em;line-height:1.05}
+.cover .sub{font-size:1.15rem;margin:10px 0 18px;max-width:30em}
+.cover .char{max-width:260px;transform:rotate(-3deg)}
+.ruled{border-top:2px dashed var(--grid);margin:28px 0 16px}
+.sec-title{font-size:1.25rem;margin-bottom:8px}
+.howto{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px}
+.howto .note{cursor:default}
+.endings{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.end{border:2px solid var(--ink);border-radius:10px 3px 10px 3px;padding:8px;text-align:center;background:var(--paper);font-size:.9rem;display:grid;justify-items:center;gap:2px}
+.end .ic{width:44px;height:44px}
+.end.locked{border-style:dashed;color:var(--pencil);background:transparent}
+.perks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:10px}
+.perk{display:grid;gap:4px;border:2px solid var(--ink);padding:10px 12px;background:var(--paper);border-radius:3px 12px 3px 12px;text-align:left;cursor:pointer}
+.perk.equip{background:var(--hl)}
+.perk.locked{border-style:dashed}
+.perk small{color:var(--pencil)}
+.scars{font-size:1.05rem}
+
+.scene-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+.scene-h h2{font-size:2rem}
+.dice6{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:20px;margin-top:20px}
+.d6{display:flex;gap:12px;align-items:center}
+.d6 .face{width:64px;height:64px;flex:none;border:3px solid var(--ink);border-radius:14px 8px 16px 9px;display:grid;place-items:center;
+  font-family:var(--num);font-weight:700;font-size:2.4rem;background:var(--paper);box-shadow:3px 3px 0 var(--ink)}
+.d6 .face.roll{animation:wobble .5s ease}
+@keyframes wobble{25%{transform:rotate(-18deg)}50%{transform:rotate(14deg) scale(1.1)}75%{transform:rotate(-6deg)}}
+.d6 .note{cursor:default;flex:1}
+
+.form{background:var(--paper);border:2px solid var(--ink);margin-top:16px;overflow-x:auto}
+.form table{width:100%;border-collapse:collapse;min-width:520px}
+.form th,.form td{border-bottom:1.5px solid var(--grid);padding:8px 10px;text-align:left;vertical-align:middle}
+.form th{font-size:.9rem;color:var(--pencil);font-weight:400;background:rgba(221,231,240,.35)}
+.form tr.row{cursor:pointer}
+.form tr.row:hover td{background:rgba(255,228,92,.25)}
+.form .slot{width:2.2em;height:2.2em;border:2px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-family:var(--num);font-weight:700;font-size:1.3rem;color:var(--red)}
+.form .pct{font-family:var(--num);font-weight:700;font-size:1.3rem}
+.form .tier{font-weight:700}
+.form .fixed td{color:var(--pencil)}
+
+.results{display:grid;gap:12px;margin-top:18px}
+.resrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:1.5px dashed var(--grid);padding-bottom:10px;min-height:56px}
+.resrow .nm{font-size:1.2rem;font-weight:700;min-width:7em}
+
+.machine{width:min(260px,70vw);display:block;margin:12px auto 0}
+.machine.shake{animation:shake .9s ease}
+@keyframes shake{10%,50%,90%{transform:rotate(-4deg)}30%,70%{transform:rotate(4deg)}}
+.machine .line{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.profcard{max-width:380px;margin:18px auto 0;--c:var(--n-pink);cursor:default;align-items:center;text-align:center}
+.profcard .ic{width:96px;height:96px}
+.rar{font-family:var(--num);font-size:2rem;font-weight:700;line-height:1}
+.rar.SSR{color:#c48a00;text-shadow:0 0 12px rgba(255,200,0,.6)}
+.rar.SR{color:#7a4cc2}
+.rar.R{color:var(--pencil)}
+.quote{font-size:1.1rem;font-weight:700}
+.center{text-align:center}
+.mt{margin-top:18px}
+
+.sem-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px}
+.semname{font-size:2.4rem;letter-spacing:.06em}
+.semname.flip{animation:flipIn .6s ease backwards}
+@keyframes flipIn{from{transform:rotateX(90deg);opacity:0}}
+.steps{display:flex;gap:6px;align-items:center}
+.steps i{width:14px;height:14px;border:2px solid var(--ink);border-radius:50%;display:inline-block}
+.steps i.on{background:var(--ink)}
+.semdots{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.semdots i{width:12px;height:12px;border:2px solid var(--pencil);border-radius:3px;display:inline-block}
+.semdots i.past{background:var(--pencil)}
+.semdots i.now{background:var(--hl);border-color:var(--ink)}
+.semdots i.over{border-color:var(--red);border-style:dashed}
+.semdots i.over.past{background:var(--red)}
+.goal{font-size:.95rem;margin-top:4px}
+
+.committee{width:min(420px,100%);display:block;margin:6px auto 0}
+.committee .line{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.bubble{position:relative;max-width:520px;margin:10px auto 0;background:var(--paper);border:2.5px solid var(--ink);border-radius:22px 18px 24px 16px;padding:12px 18px;font-size:1.25rem;font-weight:700;text-align:center}
+.bubble::after{content:"";position:absolute;top:-14px;left:50%;border:12px solid transparent;border-bottom-color:var(--ink);border-top:0;transform:translateX(-50%)}
+.score{display:flex;justify-content:center;gap:10px;margin-top:8px;font-size:1.4rem}
+
+.cert{background:var(--paper);border:3px double var(--ink);outline:2px solid var(--ink);outline-offset:6px;padding:28px 26px;margin:14px auto 0;max-width:640px;text-align:center;position:relative}
+.cert h2{font-size:clamp(2rem,6vw,2.8rem);margin:4px 0 8px}
+.cert .ic{width:110px;height:110px}
+.cert .story{font-size:1.12rem;max-width:30em;margin:8px auto}
+.cert .stats{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;margin-top:14px;font-size:.95rem;color:var(--pencil)}
+.cert .stamp{position:absolute;right:18px;top:18px}
+.care{margin-top:14px;font-size:.92rem;background:var(--n-green);display:inline-block;padding:6px 12px;transform:rotate(-1deg)}
+
+@media (max-width:760px){
+  #layout{grid-template-columns:minmax(0,1fr);gap:16px}
+  #side{position:static;border-right:none;border-bottom:2px solid var(--margin);padding:0 0 10px;display:grid;grid-template-columns:86px minmax(0,1fr);gap:2px 12px;align-items:start}
+  #side .char{max-width:86px}
+  #side .who{grid-column:1;margin:0;font-size:.75rem;line-height:1.3}
+  #side .stats{grid-column:2;grid-row:1 / span 2}
+  #side .bar{font-size:.82rem;grid-template-columns:4.4em 1fr 2em}
+  #side .counts{margin-top:6px}
+  #side .attrs{margin-top:6px}
+  #side .attrs b{font-size:1.15rem}
+  #side .extra{grid-column:1 / -1;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+  #side .extra .side-sec{margin-top:4px}
+  #side .extra h4{display:none}
+  #side .relic{width:32px;height:32px}
+  .cover{grid-template-columns:minmax(0,1fr)}
+  .cover .char{max-width:180px}
+  .semname{font-size:1.9rem}
+  .page{padding:22px 16px 18px 56px}
+  .page .pic{left:2px;width:34px}
+  .page{background-image:linear-gradient(90deg,transparent 40px,var(--margin) 40px,var(--margin) 42px,transparent 42px),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0s !important;transition:none !important}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="rough" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6"/>
+    </filter>
+  </defs>
+</svg>
+
+<div id="app">
+  <header id="hud" hidden></header>
+  <main id="layout" class="solo">
+    <aside id="side" hidden></aside>
+    <section id="stage" aria-live="polite"></section>
+  </main>
+</div>
+<div id="modal" class="layer" hidden></div>
+<div id="dice" class="layer" hidden></div>
+
+<script>
+/* ================= utilities ================= */
+const $ = s => document.querySelector(s);
+const rnd = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=rnd(0,i);[a[i],a[j]]=[a[j],a[i]]} return a; };
+const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+const wait = ms => new Promise(r=>setTimeout(r,ms));
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const tilt = () => (Math.random()*4-2).toFixed(1)+'deg';
+const NOTE_COLORS = ['var(--n-yellow)','var(--n-pink)','var(--n-green)','var(--n-blue)','var(--n-orange)'];
+
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+const META_KEY = 'gradRogue.meta.v1';
+let META = Object.assign({scars:0,unlocked:[],endings:[],runs:0,equip:null,tut:false}, store.get(META_KEY,{}));
+const saveMeta = () => store.set(META_KEY, META);
+
+class EndGame { constructor(id){ this.id=id; } }
+
+/* ================= doodle icons (64×64, stroke only) ================= */
+const IC = {
+  gpu:`<rect x="7" y="18" width="50" height="26" rx="3"/><circle cx="22" cy="31" r="8"/><circle cx="42" cy="31" r="8"/><path d="M22 23v16M14 31h16M42 23v16M34 31h16M13 44v7M20 44v7M27 44v7M34 44v7M41 44v7M48 44v7"/>`,
+  rat:`<path d="M10 46Q8 28 27 26Q45 24 51 37L59 41L51 46Z"/><circle cx="43" cy="26" r="6"/><circle cx="51" cy="38" r="1.6" fill="currentColor"/><path d="M10 46Q1 52 6 59Q11 63 17 58M23 46v5M39 46v5M59 41l4-2M59 42l4 1"/>`,
+  flask:`<path d="M24 7h16M28 7v18L13 51q-2 6 5 6h28q7 0 5-6L36 25V7"/><path d="M19 41h26"/><circle cx="27" cy="48" r="2.2"/><circle cx="37" cy="46" r="1.6"/><circle cx="33" cy="51" r="1.2"/>`,
+  paper:`<path d="M15 6h25l10 10v42H15z"/><path d="M40 6v10h10M21 25h23M21 33h23M21 41h23M21 49h14"/>`,
+  coffee:`<path d="M11 24h33v15a13 13 0 0 1-13 13h-7a13 13 0 0 1-13-13z"/><path d="M44 28a7 7 0 0 1 0 14"/><path d="M21 18q-5-5 0-11M31 18q-5-5 0-11"/>`,
+  prof:`<circle cx="32" cy="27" r="16"/><circle cx="25" cy="27" r="5"/><circle cx="39" cy="27" r="5"/><path d="M30 27h4M18 20q2-10 14-10q12 0 14 10M27 37q5 3 10 0M12 62q4-16 20-16q16 0 20 16"/>`,
+  plane:`<path d="M6 36l52-20q4-1 3 3L40 54l-8-13l-12 9l2-13z"/><path d="M32 41l26-25"/><path d="M8 52q8 2 14-2" stroke-dasharray="3 4"/>`,
+  money:`<rect x="6" y="18" width="52" height="30" rx="3"/><circle cx="32" cy="33" r="8"/><path d="M32 27v12M29 30h5a2 2 0 0 1 0 4h-4a2 2 0 0 0 0 4h5M12 24v4M52 38v4"/>`,
+  devil:`<circle cx="32" cy="36" r="18"/><path d="M18 24L12 8l14 10M46 24l6-16l-14 10M22 31l7 3M42 31l-7 3M24 46q8-6 16 0"/><circle cx="26" cy="36" r="1.5" fill="currentColor"/><circle cx="38" cy="36" r="1.5" fill="currentColor"/><text x="49" y="62" font-size="18">2</text>`,
+  petri:`<ellipse cx="32" cy="34" rx="25" ry="11"/><path d="M7 34v6q0 11 25 11t25-11v-6"/><circle cx="22" cy="33" r="3"/><circle cx="36" cy="30" r="4"/><circle cx="43" cy="37" r="2"/><circle cx="29" cy="38" r="1.6"/>`,
+  phone:`<rect x="18" y="5" width="28" height="54" rx="5"/><path d="M28 10h8M29 53h6"/><text x="32" y="36" font-size="13" text-anchor="middle">3:12</text>`,
+  beach:`<path d="M10 30q22-26 44 0q-11-6-22 0q-11-6-22 0z"/><path d="M32 22v34M6 58q6-4 12 0t12 0t12 0t12 0"/><circle cx="52" cy="10" r="4"/>`,
+  mic:`<rect x="24" y="6" width="16" height="26" rx="8"/><path d="M17 26q0 15 15 15t15-15M32 41v12M20 57h24"/>`,
+  book:`<path d="M32 16q-12-8-26-4v38q14-4 26 4q12-8 26-4V12q-14-4-26 4zM32 16v38"/><path d="M12 22q8-2 14 1M12 30q8-2 14 1M38 23q6-3 14-1M38 31q6-3 14-1"/>`,
+  server:`<rect x="12" y="7" width="40" height="15" rx="2"/><rect x="12" y="25" width="40" height="15" rx="2"/><rect x="12" y="43" width="40" height="15" rx="2"/><circle cx="20" cy="14.5" r="1.8" fill="currentColor"/><circle cx="20" cy="32.5" r="1.8" fill="currentColor"/><circle cx="20" cy="50.5" r="1.8" fill="currentColor"/><path d="M30 14h16M30 32h16M30 50h16"/>`,
+  wind:`<rect x="8" y="10" width="22" height="50"/><path d="M13 16h4M21 16h4M13 24h4M21 24h4M13 32h4M21 32h4M13 40h4M21 40h4M15 60v-8h6v8"/><path d="M34 18h16q6 0 6-5t-5-4M34 28h22M34 38h14q6 0 6 5t-5 4"/>`,
+  fire:`<path d="M32 58q-17 0-17-16q0-12 10-22q0 8 6 10q-2-14 9-24q0 14 9 22q6 6 6 14q0 16-17 16z"/><path d="M32 58q-7 0-7-8q0-6 5-10q1 5 5 6q4 3 4 6q0 6-7 6z"/>`,
+  chart:`<path d="M8 6v50h50"/><path d="M14 44l10-12l9 6l9-16l12 6" /><path d="M48 24l6 4l1-7"/>`,
+  dna:`<path d="M20 4q24 14 0 28t0 28M44 4q-24 14 0 28t0 28M23 10h18M28 18h8M28 46h8M23 54h18M24 32h16"/>`,
+  hotpot:`<path d="M6 30h52q0 22-26 22T6 30z"/><path d="M2 30h60M22 22q-4-6 0-12M32 22q-4-6 0-12M42 22q-4-6 0-12M20 56h24"/>`,
+  cap:`<path d="M4 24L32 12l28 12l-28 12z"/><path d="M16 29v13q16 9 32 0V29M56 26v16"/><circle cx="56" cy="44" r="2.5"/>`,
+  mail:`<rect x="6" y="14" width="52" height="36" rx="2"/><path d="M6 16l26 20l26-20M6 50l18-16M58 50l-18-16"/>`,
+  hourglass:`<path d="M16 6h32M16 58h32M20 6q0 18 12 26q12-8 12-26M20 58q0-18 12-26q12 8 12 26"/><path d="M26 52h12l-6-6z"/>`,
+  cat:`<path d="M14 26L12 8l12 9q8-3 16 0l12-9l-2 18q4 6 4 13q0 18-22 18T10 39q0-7 4-13z"/><circle cx="24" cy="34" r="2" fill="currentColor"/><circle cx="40" cy="34" r="2" fill="currentColor"/><path d="M29 41q3 3 6 0M4 38l12 2M4 46l12-2M60 38l-12 2M60 46l-12-2"/>`,
+  chair:`<path d="M20 6h24l-2 26H22z"/><path d="M16 36h32M32 36v12M18 56l14-8l14 8M18 58v-2M46 58v-2M12 36v-8M52 36v-8"/>`,
+  charm:`<path d="M20 18h24v32q0 8-12 8t-12-8z"/><path d="M26 18q6-14 12 0M24 28h16"/><text x="32" y="46" font-size="15" text-anchor="middle">畢</text>`,
+  phones:`<path d="M10 40v-8a22 22 0 0 1 44 0v8"/><rect x="6" y="38" width="12" height="18" rx="4"/><rect x="46" y="38" width="12" height="18" rx="4"/>`,
+  gym:`<path d="M18 32h28"/><rect x="8" y="20" width="8" height="24" rx="2"/><rect x="48" y="20" width="8" height="24" rx="2"/><path d="M4 26v12M60 26v12"/>`,
+  sad:`<circle cx="32" cy="32" r="22"/><path d="M22 28h6M36 28h6M22 46q10-8 20 0M45 34q2 6 0 8"/>`,
+  boba:`<path d="M16 18h32l-4 40H20z"/><path d="M14 18h36M36 4l-6 30"/><circle cx="25" cy="50" r="2.4"/><circle cx="32" cy="52" r="2.4"/><circle cx="39" cy="50" r="2.4"/><circle cx="29" cy="45" r="2.4"/><circle cx="36" cy="45" r="2.4"/>`,
+  chicken:`<path d="M18 40q-8-12 4-22q10-8 20 0q12 10 4 22l-6 6H24z"/><path d="M24 46l-3 12h22l-3-12M26 28h2M36 28h2"/><path d="M14 22q-6-2-6 4M50 22q6-2 6 4"/>`,
+  video:`<rect x="6" y="14" width="40" height="34" rx="4"/><path d="M46 26l12-7v24l-12-7zM22 24v14l11-7z"/>`,
+  ruler:`<path d="M6 44L44 6l14 14l-38 38z"/><path d="M16 34l5 5M22 28l3 3M28 22l5 5M34 16l3 3M40 10l5 5"/>`,
+  office:`<rect x="10" y="8" width="44" height="50"/><path d="M10 20h44M18 30h8M38 30h8M18 42h8M38 42h8M28 58V48h8v10"/><path d="M48 14l8-4" />`,
+  question:`<path d="M22 22q0-12 11-12t11 11q0 7-8 10q-4 2-4 8"/><circle cx="32" cy="50" r="2.5" fill="currentColor"/>`
+};
+const icon = (k,cls='') => `<svg class="ic ${cls}" viewBox="0 0 64 64" aria-hidden="true">${IC[k]||IC.question}</svg>`;
+
+/* ================= game data ================= */
+const STATN = {skill:'腦力',stamina:'肝度',talk:'嘴砲',luck:'運氣',favor:'教授好感'};
+const DELTAN = {san:'精神',prog:'進度',money:'存款',favor:'教授好感',papers:'論文',skill:'腦力',stamina:'肝度',talk:'嘴砲',luck:'運氣'};
+
+const FIELDS = {
+  cs:{id:'cs',name:'資訊工程',icon:'gpu',tag:'顯卡・Deadline・Reviewer 2',sub:'投頂會',venue:'NeurIPS',c:'var(--n-blue)'},
+  bio:{id:'bio',name:'生命科學',icon:'rat',tag:'老鼠・細胞・週末換液',sub:'投期刊',venue:'Cell 子刊',c:'var(--n-green)'}
+};
+
+const SCHOOLS = [
+  {id:'S',name:'國立肝大',motto:'肝不好，進不來',base:12,dc:3,growth:1.3,pressure:5,job:4},
+  {id:'A',name:'清蒸交大',motto:'清晨蒸發，交出報告',base:25,dc:2,growth:1.15,pressure:4,job:3},
+  {id:'B',name:'不成功大',motto:'失敗為成功之母，我們只有母',base:42,dc:1,growth:1.0,pressure:3,job:2},
+  {id:'C',name:'中央空調大學',motto:'冷氣很強，其他隨緣',base:62,dc:0,growth:0.9,pressure:2,job:1},
+  {id:'D',name:'國立山上科大',motto:'猴子比學生多',base:100,dc:-1,growth:0.8,pressure:1,job:0}
+];
+
+const PROFS = [
+  {id:'zen', r:'SSR',name:'佛系放養型',icon:'beach',quote:'你自己決定就好，我相信你。',desc:'不給壓力，也不給方向。好感幾乎不會掉。',pressure:-1,stipend:2,prog:.9,paper:0,decay:0},
+  {id:'god', r:'SSR',name:'學術大神型',icon:'prof',quote:'這個結果，可以投 Nature。',desc:'投稿擲骰 +3，但要求很高。',pressure:4,stipend:3,prog:1.1,paper:3,decay:3},
+  {id:'wind',r:'SR', name:'八樓風很大型',icon:'wind',quote:'我辦公室在八樓，風很大，想清楚再進來。',desc:'進度飛快，精神也飛快。',pressure:4,stipend:2,prog:1.25,paper:1,decay:4},
+  {id:'kind',r:'SR', name:'慈父慈母型',icon:'cat',quote:'先把身體顧好，論文慢慢來。',desc:'每學期回復精神。',pressure:-3,stipend:2,prog:1.0,paper:0,decay:1},
+  {id:'fly', r:'R',  name:'出國開會型',icon:'plane',quote:'我現在在機場，回來再說。',desc:'一學期見三次面。',pressure:1,stipend:2,prog:1.0,paper:0,decay:2},
+  {id:'line',r:'R',  name:'凌晨三點 Line 你型',icon:'phone',quote:'（03:12）睡了嗎？明天 meeting 改 8 點。',desc:'進度變快，睡眠變少。',pressure:4,stipend:2,prog:1.15,paper:0,decay:3},
+  {id:'boss',r:'R',  name:'廉價勞工型',icon:'money',quote:'這個計畫的報帳，先幫我弄一下。',desc:'錢比較多，研究比較慢。',pressure:2,stipend:4,prog:.85,paper:0,decay:3},
+  {id:'new', r:'R',  name:'新進助理教授型',icon:'hourglass',quote:'我們一起拚 tenure！',desc:'（是他的 tenure）投稿 +1。',pressure:3,stipend:2,prog:1.1,paper:1,decay:2}
+];
+
+const RELICS = [
+  {id:'coffee',name:'無限咖啡卡',icon:'coffee',desc:'每學期精神 +4'},
+  {id:'chair',name:'人體工學椅',icon:'chair',desc:'每學期精神 +3，腰不再痛'},
+  {id:'cat',name:'實驗室的貓',icon:'cat',desc:'每學期精神 +5'},
+  {id:'code',name:'學長的祖傳程式碼',icon:'server',desc:'進度獲得 +20%',field:'cs'},
+  {id:'hela',name:'不會死的細胞株',icon:'petri',desc:'進度獲得 +20%',field:'bio'},
+  {id:'ai',name:'AI 潤稿訂閱',icon:'paper',desc:'投稿擲骰 +2'},
+  {id:'mouth',name:'嘴砲課程結業證書',icon:'mic',desc:'嘴砲 +2',get:()=>S.st.talk+=2},
+  {id:'exam',name:'祖傳考古題',icon:'book',desc:'口試、資格考擲骰 +3'},
+  {id:'grant',name:'獎學金',icon:'money',desc:'每學期存款 +1 萬'},
+  {id:'charm',name:'畢業御守',icon:'charm',desc:'所有擲骰 +1'},
+  {id:'phones',name:'降噪耳機',icon:'phones',desc:'精神損失 −20%'},
+  {id:'gym',name:'健身房會員',icon:'gym',desc:'肝度 +2',get:()=>S.st.stamina+=2}
+];
+
+const PERKS = [
+  {id:'dice',name:'多一次重骰',desc:'開局屬性可以多重骰一次',cost:2},
+  {id:'thick',name:'臉皮變厚',desc:'被 Reviewer 和口委打擊時，精神損失減半',cost:3},
+  {id:'rec',name:'強力推薦信',desc:'推甄錄取率 +12%',cost:4},
+  {id:'rich',name:'家裡有礦',desc:'起始存款 +8 萬',cost:4},
+  {id:'legacy',name:'學長的遺產',desc:'開局獲得一個隨機道具',cost:6},
+  {id:'pity',name:'轉蛋保底',desc:'指導教授至少 SR',cost:8}
+];
+
+const ENDINGS = {
+  tsmc:{t:'竹科工程師',ic:'gpu',tier:3,good:true,x:'碩士畢業直接進竹科。年薪是教授的兩倍，週末還能睡到中午。偶爾想起實驗室……然後繼續睡。'},
+  chicken:{t:'回家繼承雞排攤',ic:'chicken',tier:1,x:'延畢期限到了。你回家炸雞排，第一個月的營收就超過整間實驗室的經費。'},
+  beach:{t:'墾丁衝浪一年',ic:'beach',tier:1,care:true,x:'精神歸零。你辦了休學，去墾丁學衝浪。原來海浪比 Reviewer 溫柔多了。'},
+  boba:{t:'手搖飲之神',ic:'boba',tier:1,x:'存款見底，你去手搖飲打工。三個月後，你成為全台搖得最均勻的店員。'},
+  kicked:{t:'逐出師門',ic:'video',tier:2,x:'教授好感歸零，你被請出實驗室。你開了一個講學術八卦的 YouTube 頻道，訂閱破十萬。'},
+  qualfail:{t:'資格考的終點',ic:'question',tier:2,x:'資格考兩次沒過。你帶著碩士學位離開，發現外面的世界其實很大。'},
+  seven:{t:'第七年的信',ic:'mail',tier:2,x:'博七下，學校寄來一封信：「修業年限已屆。」你把它裱框掛在牆上。'},
+  drind:{t:'業界的博士',ic:'office',tier:4,good:true,x:'拿到博士學位後進了業界。同事都叫你「博士」，連訂便當都是。'},
+  headhunt:{t:'被大廠挖角',ic:'plane',tier:4,good:true,x:''},
+  cafe:{t:'流浪博後咖啡館',ic:'coffee',tier:3,x:'博後合約一期一期結束。你開了一間咖啡廳叫「Reviewer 2」，每杯都很苦，生意很好。'},
+  prof:{t:'助理教授',ic:'wind',tier:6,good:true,x:'收到聘書了！你搬進新辦公室，打開窗戶：原來八樓的風，真的很大。門外，你的第一個研究生正在等你 meeting。'}
+};
+const END_ORDER = ['prof','drind','headhunt','tsmc','cafe','kicked','qualfail','seven','chicken','boba','beach'];
+
+/* ================= run state ================= */
+let S = null;
+const has = id => S.relics.includes(id);
+const perk = id => S && S.perk === id;
+const statVal = k => k==='favor' ? Math.floor(S.favor/10) : S.st[k];
+const luckMod = () => Math.floor((S.st.luck-6)/2);
+const ouch = v => perk('thick') ? Math.round(v/2) : v;
+
+function newState(){
+  return {field:null,school:null,prof:null,st:{skill:5,stamina:5,talk:5,luck:5},
+    san:80,favor:50,prog:0,money:5,papers:0,stage:'ms',sem:0,total:0,
+    relics:[],perk:META.equip && META.unlocked.includes(META.equip) ? META.equip : null,
+    qual:false,qualFail:0,seen:{},warned:false};
+}
+
+function progMult(){
+  let m = S.school.growth * S.prof.prog;
+  if(has('code')||has('hela')) m *= 1.2;
+  if(S.stage==='ms') m *= 1.15;
+  if(S.stage==='phd') m *= .6;
+  return m;
+}
+function sanMult(){
+  let m = Math.max(.55, 1 - (S.st.stamina-6)*.05);
+  if(has('phones')) m *= .8;
+  return m;
+}
+
+/* apply a bundle of changes, return [[key,value],…] that actually applied */
+function gain(d){
+  const out=[];
+  for(const k in d){
+    let v=d[k]; if(!v) continue;
+    if(k==='prog' && v>0) v=Math.max(1,Math.round(v*progMult()));
+    if(k==='san' && v<0) v=Math.min(-1,Math.round(v*sanMult()));
+    if(k in S.st){ S.st[k]=Math.max(1,S.st[k]+v); }
+    else if(k==='san'||k==='favor'){ const b=S[k]; S[k]=clamp(S[k]+v,0,100); v=S[k]-b; }
+    else if(k==='prog'){ const b=S.prog; S.prog=clamp(S.prog+v,0,100); v=S.prog-b; }
+    else S[k]+=v;
+    if(v) out.push([k,v]);
+  }
+  if(S.stage==='pd' && S.prog>=100){ S.prog=0; S.papers++; out.push(['papers',1]); }
+  refresh(out.map(o=>o[0]));
+  return out;
+}
+function checkFail(){
+  if(S.san<=0) throw new EndGame('beach');
+  if(S.money<0) throw new EndGame('boba');
+  if(S.favor<=0) throw new EndGame('kicked');
+}
+
+/* ================= UI primitives ================= */
+function ui(html, solo=false){
+  const st=$('#stage');
+  $('#layout').classList.toggle('solo', solo);
+  $('#side').hidden = solo || !(S && S.prof);
+  st.innerHTML=html;
+  st.classList.remove('enter'); void st.offsetWidth; st.classList.add('enter');
+  window.scrollTo({top:0,behavior:REDUCED?'auto':'smooth'});
+}
+function clickOnce(root, sel){
+  return new Promise(res=>{
+    let done=false;
+    root.querySelectorAll(sel).forEach(el=>el.addEventListener('click',()=>{ if(done||el.disabled) return; done=true; res(el.dataset.v ?? el.dataset.i); }));
+  });
+}
+function modal(inner, btns=['繼續'], col=false, pic=null){
+  return new Promise(res=>{
+    const m=$('#modal');
+    m.innerHTML=`<div class="page" role="dialog" aria-modal="true">${pic?`<svg class="ic pic" viewBox="0 0 64 64">${IC[pic]||IC.question}</svg>`:''}${inner}
+      <div class="btns ${col?'col':''}">${btns.map((b,i)=>`<button class="btn ${i===0&&!col?'primary':''}" data-i="${i}">${b}</button>`).join('')}</div></div>`;
+    m.hidden=false;
+    const bs=[...m.querySelectorAll('.btns .btn')];
+    bs.forEach(b=>b.onclick=()=>{ m.hidden=true; res(+b.dataset.i); });
+    bs[0] && bs[0].focus({preventScroll:true});
+  });
+}
+function deltaHTML(ds){
+  if(!ds||!ds.length) return '';
+  return `<div class="deltas">${ds.map(([k,v])=>{
+    const good = (k==='san'||k==='prog'||k==='money'||k==='favor'||k==='papers'||k in STATN) ? v>0 : v<0;
+    return `<span class="delta ${good?'up':'down'}">${DELTAN[k]} ${v>0?'+':'−'}${Math.abs(v)}${k==='money'?' 萬':''}</span>`;
+  }).join('')}</div>`;
+}
+function note(title, text, ds, pic){
+  return modal(`<h2>${title}</h2><p>${text}</p>${deltaHTML(ds)}`, ['繼續'], false, pic);
+}
+
+/* d20 roll with full breakdown */
+function d20svg(n){
+  return `<svg class="d20" viewBox="0 0 120 120"><polygon points="60,5 108,32 108,88 60,115 12,88 12,32"/><polygon class="inner" points="60,28 88,76 32,76"/><path d="M60 5L60 28M108 32L88 76M12 32L32 76M60 115L88 76M60 115L32 76M12 88L32 76M108 88L88 76M12 32L60 28M108 32L60 28" fill="none"/><text x="60" y="62" text-anchor="middle" dominant-baseline="middle">${n}</text></svg>`;
+}
+async function roll(stat, dc, label, extra=[]){
+  const mods=[];
+  if(stat) mods.push([STATN[stat], statVal(stat)]);
+  if(stat!=='luck'){ const lm=luckMod(); if(lm) mods.push(['運氣',lm]); }
+  if(has('charm')) mods.push(['御守',1]);
+  extra.forEach(e=>{ if(e[1]) mods.push(e); });
+  const mod=mods.reduce((a,b)=>a+b[1],0);
+  const need=clamp(dc-mod,2,20);
+  const L=$('#dice');
+  L.innerHTML=`<div class="box"><div class="label">${label}</div>${d20svg('?')}
+    <div class="mods">${mods.map(m=>`${m[0]} ${m[1]>=0?'+':''}${m[1]}`).join('　')}</div>
+    <div class="need">需要擲出 ≥ <b class="num">${need}</b></div><div class="res" style="min-height:3.2rem"></div><div class="tap">點一下繼續</div></div>`;
+  L.hidden=false;
+  const svg=L.querySelector('.d20'), t=svg.querySelector('text');
+  svg.classList.add('spin');
+  const n=rnd(1,20);
+  if(!REDUCED){ for(let i=0;i<9;i++){ t.textContent=rnd(1,20); await wait(90); } }
+  t.textContent=n;
+  const ok = n===20 || (n!==1 && n+mod>=dc);
+  const txt = n===20?'大成功！':n===1?'大失敗…':ok?'成功':'失敗';
+  L.querySelector('.res').innerHTML=`<span class="stamp ${ok?'good':''}">${txt}</span>`;
+  await new Promise(r=>{ const t1=setTimeout(r,1700); L.onclick=()=>{clearTimeout(t1);r();}; });
+  L.onclick=null; L.hidden=true;
+  return {ok,n,crit:n===20,fumble:n===1};
+}
+
+/* ================= character doodle ================= */
+function charSVG(o){
+  const san=o.san??80, stage=o.stage||'ug', cups=o.cups||0;
+  const HN=13, hair=Math.round(san/100*HN);
+  let strands='';
+  for(let i=0;i<HN;i++){
+    if(i>=hair) continue;
+    const a=(-68+i*(136/(HN-1)))*Math.PI/180;
+    const x=90+40*Math.sin(a), y=74-40*Math.cos(a);
+    const x2=90+56*Math.sin(a+.12), y2=74-56*Math.cos(a+.12);
+    const cx=90+52*Math.sin(a-.18), cy=74-52*Math.cos(a-.18);
+    strands+=`<path class="line" d="M${x.toFixed(1)} ${y.toFixed(1)}Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}"/>`;
+  }
+  let fallen='';
+  for(let i=0;i<HN-hair;i++){
+    const fx=22+((i*37)%70)+(i%2?78:0), fy=182+(i%3)*2;
+    fallen+=`<path class="line" style="stroke-width:2" d="M${fx} ${fy}q4 -6 8 -2t8 -1"/>`;
+  }
+  const body = stage==='phd' ? '#fbfcf8' : stage==='pd' ? '#c7cfdd' : stage==='ms' ? '#ffd4dd' : '#d2e3ff';
+  let clothes=`<path class="line" style="fill:${body}" d="M28 190q6-58 62-60q56 2 62 60z"/>`;
+  if(stage==='phd') clothes+=`<path class="line" d="M90 132v58M78 134l12 22l12-22M70 160h10"/>`;
+  else if(stage==='pd') clothes+=`<path class="line" d="M80 134l10 10l10-10M90 144l-5 20l5 8l5-8z"/>`;
+  else if(stage==='ms') clothes+=`<path class="line" d="M70 134q20 22 40 0M84 150v14M96 150v14"/>`;
+  else clothes+=`<text x="90" y="172" text-anchor="middle" style="font:700 15px var(--hand);fill:var(--ink)">畢業快樂</text>`;
+  let eyes, mouth;
+  if(san>65){ eyes=`<path class="line" d="M68 80q6-8 12 0M100 80q6-8 12 0"/>`; mouth=`<path class="line" d="M76 100q14 13 28 0"/>`; }
+  else if(san>35){ eyes=`<circle cx="74" cy="79" r="3.4" fill="#1f2d4a"/><circle cx="106" cy="79" r="3.4" fill="#1f2d4a"/>`; mouth=`<path class="line" d="M80 104h20"/>`; }
+  else { eyes=`<path class="line" d="M74 79m-5 0a5 5 0 1 0 5-5a3 3 0 1 0 2 4M106 79m-5 0a5 5 0 1 0 5-5a3 3 0 1 0 2 4"/>`; mouth=`<path class="line" d="M74 106q4-5 8 0t8 0t8 0t8 0"/>`; }
+  const bag=(1-san/100)*.95;
+  const bags=`<path d="M66 88q8 5 16 0M98 88q8 5 16 0" fill="none" stroke="#7b5aa6" stroke-width="3" stroke-linecap="round" opacity="${bag.toFixed(2)}"/>`;
+  const sweat= san<45 ? `<path d="M128 70q6 10 0 14q-6-4 0-14z" fill="#d2e3ff" stroke="#1f2d4a" stroke-width="2"/>` : '';
+  const stub = stage==='pd' ? `<path d="M80 114l1 2M88 116l1 2M96 116l1 2M104 114l1 2" class="line" style="stroke-width:2"/>` : '';
+  const cap = (stage==='phd'||stage==='pd') ? `<g transform="rotate(-8 90 40)"><path class="line" style="fill:#1f2d4a" d="M48 40L90 22l42 18l-42 16z"/><path class="line" d="M128 42v20"/><circle cx="128" cy="64" r="3" fill="#ffe45c" stroke="#1f2d4a" stroke-width="2"/></g>` : '';
+  let cupS='';
+  for(let i=0;i<Math.min(cups,7);i++){
+    const y=176-i*13, x=162+(i%2?2:-2);
+    cupS+=`<path class="line" style="fill:#fbfcf8;stroke-width:2.2" d="M${x-8} ${y-11}h16l-2 12h-12z"/>`;
+  }
+  return `<svg class="char" viewBox="0 0 190 196" aria-hidden="true" style="filter:url(#rough)">
+    ${fallen}${clothes}
+    <circle cx="90" cy="76" r="40" fill="#fff6ea" class="line"/>
+    ${strands}${eyes}${bags}${mouth}${sweat}${stub}
+    <path class="line" style="stroke-width:2.4" d="M60 96q3 2 6 0M114 96q3 2 6 0" opacity=".5"/>
+    ${cap}${cupS}</svg>`;
+}
+
+/* ================= HUD / side panel ================= */
+const STAGES = [['ms','碩士'],['phd','博士'],['pd','博後']];
+function semName(){
+  const y=Math.ceil(S.sem/2), half=S.sem%2?'上':'下', yn='一二三四五六七八'[y-1]||y;
+  if(S.stage==='ms') return `碩${yn}${half}`;
+  if(S.stage==='phd') return `博${yn}${half}`;
+  return `博後第${yn}年${half}`;
+}
+function renderHud(){
+  const h=$('#hud'); h.hidden=false;
+  const idx=STAGES.findIndex(s=>s[0]===S.stage);
+  h.innerHTML=`<button class="brand" id="home" title="回到封面">研究所求生記</button>
+    <nav class="track" aria-label="學術生涯進度"><span class="stg done">推甄</span>${STAGES.map((s,i)=>`<span class="arrow">→</span><span class="stg ${i<idx?'done':i===idx?'now hl':''}">${s[1]}</span>`).join('')}<span class="arrow">→</span><span class="stg">教職？</span></nav>`;
+  $('#home').onclick=async()=>{ if(await modal('<h2>放棄這一局？</h2><p>這輩子的研究生涯會直接結束，傷疤不會增加。</p>',['繼續奮鬥','回到封面'])===1) title(); };
+}
+function refresh(changed=[]){
+  const side=$('#side'); if(!S||!S.prof){ return; }
+  if(!$('#layout').classList.contains('solo')) side.hidden=false;
+  const goal = S.stage==='pd' ? '論文草稿' : '學位進度';
+  side.innerHTML=`
+    ${charSVG({san:S.san,stage:S.stage,cups:Math.floor(S.total/2)+1})}
+    <div class="who">${S.school.name}・${FIELDS[S.field].name}</div>
+    <div class="stats">
+      <div class="bars">
+        <div class="bar" data-k="san"><span>精神</span><div class="trk"><div class="fill" style="width:${S.san}%;--bc:${S.san<30?'var(--red)':'#5aa06f'}"></div></div><span class="v">${S.san}</span></div>
+        <div class="bar" data-k="favor"><span>教授好感</span><div class="trk"><div class="fill" style="width:${S.favor}%;--bc:#c27adf"></div></div><span class="v">${S.favor}</span></div>
+        <div class="bar" data-k="prog"><span>${goal}</span><div class="trk"><div class="fill" style="width:${S.prog}%;--bc:#e3a21a"></div></div><span class="v">${S.prog}</span></div>
+      </div>
+      <div class="counts">
+        <div class="count" data-k="money"><span>存款</span><span class="num">${S.money}<small> 萬</small></span></div>
+        <div class="count" data-k="papers"><span>論文</span><span class="num">${S.papers}<small> 篇</small></span></div>
+      </div>
+      <div class="attrs">${['skill','stamina','talk','luck'].map(k=>`<div data-k="${k}"><b>${S.st[k]}</b>${STATN[k]}</div>`).join('')}</div>
+    </div>
+    <div class="extra">
+      <div class="side-sec"><h4>指導教授</h4><div class="profchip">${icon(S.prof.icon)}<div><b>${S.prof.name}</b><br><small class="muted">${S.prof.r}</small></div></div></div>
+      <div class="side-sec"><h4>道具</h4><div class="relics">${S.relics.length?S.relics.map(id=>{const r=RELICS.find(x=>x.id===id);return `<span class="relic" title="${r.name}：${r.desc}">${icon(r.icon,'sm')}</span>`}).join(''):'<span class="muted">還沒有</span>'}</div></div>
+    </div>`;
+  changed.forEach(k=>side.querySelector(`[data-k="${k}"]`)?.classList.add('bump'));
+}
+
+/* ================= title screen ================= */
+function title(){
+  S=null; $('#hud').hidden=true; $('#side').hidden=true;
+  const unl=new Set(META.unlocked);
+  ui(`
+    <section class="cover">
+      <div>${charSVG({san:100,stage:'ug'})}</div>
+      <div>
+        <p class="muted">一本被咖啡潑過的實驗記錄本</p>
+        <h1>研究所<br><span class="hl">求生記</span></h1>
+        <p class="sub">你開開心心地推甄上榜了。接下來的碩士、博士、博後，每一學期都是新的關卡。頭髮就是你的血條。</p>
+        <button class="btn primary" id="start">開始新的人生 →</button>
+        <p class="muted mt">已經投胎 ${META.runs} 次・累積學術傷疤 <b class="num">${META.scars}</b></p>
+      </div>
+    </section>
+    <div class="ruled"></div>
+    <h2 class="sec-title">怎麼玩</h2>
+    <div class="howto">
+      <div class="note" style="--r:-1.5deg;--c:var(--n-yellow)">${icon('cap')}<h3>填志願、抽教授</h3><span class="flav">屬性擲骰決定你能上哪間研究所。指導教授靠轉蛋，SSR 機率 10%。</span></div>
+      <div class="note" style="--r:1deg;--c:var(--n-pink)">${icon('paper')}<h3>每學期選兩張卡</h3><span class="flav">寫論文、跟教授 meeting、去墾丁……有些要擲 d20，結果看天。</span></div>
+      <div class="note" style="--r:-.5deg;--c:var(--n-green)">${icon('devil')}<h3>撐過口委和 Reviewer 2</h3><span class="flav">精神、存款或教授好感歸零就提早下車。失敗會留下傷疤，可以解鎖天賦。</span></div>
+    </div>
+    <div class="ruled"></div>
+    <h2 class="sec-title">結局收集 <span class="muted">${META.endings.length} / ${END_ORDER.length}</span></h2>
+    <div class="endings">${END_ORDER.map(id=>{const e=ENDINGS[id];const got=META.endings.includes(id);
+      return `<div class="end ${got?'':'locked'}">${icon(got?e.ic:'question')}<span>${got?e.t:'？？？'}</span></div>`}).join('')}</div>
+    <div class="ruled"></div>
+    <h2 class="sec-title">天賦 <span class="muted scars">用學術傷疤解鎖，每局帶一個</span></h2>
+    <div class="perks">${PERKS.map(p=>{const u=unl.has(p.id);const eq=META.equip===p.id;
+      return `<button class="perk ${u?'':'locked'} ${eq?'equip':''}" data-v="${p.id}"><b>${p.name}${eq?'（已裝備）':''}</b><span>${p.desc}</span><small>${u?(eq?'點一下卸下':'點一下裝備'):`解鎖需要 ${p.cost} 傷疤`}</small></button>`}).join('')}</div>
+  `, true);
+  $('#start').onclick=()=>run();
+  document.querySelectorAll('.perk').forEach(b=>b.onclick=async()=>{
+    const p=PERKS.find(x=>x.id===b.dataset.v);
+    if(META.unlocked.includes(p.id)){ META.equip = META.equip===p.id?null:p.id; saveMeta(); title(); return; }
+    if(META.scars<p.cost){ await modal(`<h2>傷疤不夠</h2><p>還需要 ${p.cost-META.scars} 道學術傷疤。多受點苦再來吧。</p>`,['好吧']); return; }
+    META.scars-=p.cost; META.unlocked.push(p.id); META.equip=p.id; saveMeta(); title();
+  });
+}
+
+/* ================= opening ================= */
+async function rollStats(){
+  const gen=()=>({skill:rnd(4,9),stamina:rnd(4,9),talk:rnd(4,9),luck:rnd(4,9)});
+  let rerolls = 2 + (perk('dice')?1:0);
+  S.st=gen();
+  const desc={skill:'研究、投稿、資格考',stamina:'減少精神損失',talk:'meeting、口試、找教職',luck:'每一次擲骰都會用到'};
+  while(true){
+    const sum=Object.values(S.st).reduce((a,b)=>a+b,0);
+    ui(`<div class="scene-h"><h2>大學畢業了！</h2><span class="muted">先擲骰決定你這個人</span></div>
+      <div class="dice6">${['skill','stamina','talk','luck'].map((k,i)=>`<div class="d6"><div class="face roll" style="animation-delay:${i*.08}s">${S.st[k]}</div>
+        <div class="note" style="--r:${tilt()};--c:${NOTE_COLORS[i]};--d:${i*.06}s"><h3>${STATN[k]}</h3><span class="flav">${desc[k]}</span></div></div>`).join('')}</div>
+      <p class="mt">總和 <b class="num">${sum}</b>　<span class="muted">${sum>=28?'天選之人，推甄應該穩了':sum>=24?'中規中矩，正常發揮':'嗯……人生就是要挑戰'}</span></p>
+      <div class="btns"><button class="btn" data-v="re" ${rerolls?'':'disabled'}>重骰（剩 ${rerolls} 次）</button><button class="btn primary" data-v="ok">就這樣吧 →</button></div>`, true);
+    const v=await clickOnce($('#stage'),'.btns .btn');
+    if(v==='ok') break;
+    rerolls--; S.st=gen();
+  }
+  S.money = 5 + Math.floor(S.st.luck/2) + (perk('rich')?8:0);
+}
+
+async function chooseField(){
+  ui(`<div class="scene-h"><h2>選一個領域</h2><span class="muted">決定你接下來幾年要跟什麼東西相處</span></div>
+    <div class="cards">
+      ${Object.values(FIELDS).map((f,i)=>`<button class="note" data-v="${f.id}" style="--r:${tilt()};--c:${f.c};--d:${i*.08}s">${icon(f.icon)}<h3>${f.name}</h3><span class="flav">${f.tag}</span></button>`).join('')}
+      <div class="note" style="--r:2deg;--c:var(--paper);cursor:default;opacity:.55;--d:.16s">${icon('flask')}<h3>化學</h3><span class="flav">通風櫥還在修，敬請期待</span></div>
+      <div class="note" style="--r:-2deg;--c:var(--paper);cursor:default;opacity:.55;--d:.24s">${icon('ruler')}<h3>物理</h3><span class="flav">推導到一半發現少一個負號</span></div>
+    </div>`, true);
+  S.field = await clickOnce($('#stage'),'button.note');
+}
+
+function admitPct(sc){
+  if(sc.id==='D') return 100;
+  return clamp(Math.round(sc.base + (S.st.skill+S.st.talk+S.st.luck-19)*3 + (perk('rec')?12:0)), 3, 95);
+}
+async function applySchools(){
+  const picks=[];
+  const draw=()=>{
+    ui(`<div class="scene-h"><h2>推甄志願表</h2><span class="muted">依序點選，最多填三個。全部落榜也不用怕，最後一列保證收你。</span></div>
+      <div class="form"><table>
+        <thead><tr><th>志願</th><th>學校</th><th>校訓</th><th>錄取率</th><th>資源 / 壓力</th></tr></thead>
+        <tbody>${SCHOOLS.map(sc=>{const i=picks.indexOf(sc.id);const fixed=sc.id==='D';
+          return `<tr class="${fixed?'fixed':'row'}" data-v="${sc.id}"><td><span class="slot">${fixed?'保':i>=0?i+1:''}</span></td>
+          <td class="tier">${sc.name}</td><td>${sc.motto}</td><td class="pct">${admitPct(sc)}%</td>
+          <td>${'★'.repeat(5-'SABCD'.indexOf(sc.id))}${'☆'.repeat('SABCD'.indexOf(sc.id))} / ${'🔥'.repeat(sc.pressure)}</td></tr>`}).join('')}</tbody>
+      </table></div>
+      <div class="btns"><button class="btn ghost" id="clr">清除重填</button><button class="btn primary" id="go" ${picks.length?'':'disabled'}>送出志願，等放榜 →</button></div>`, true);
+    document.querySelectorAll('tr.row').forEach(tr=>tr.onclick=()=>{
+      const id=tr.dataset.v, i=picks.indexOf(id);
+      if(i>=0) picks.splice(i,1); else if(picks.length<3) picks.push(id);
+      draw();
+    });
+    $('#clr').onclick=()=>{ picks.length=0; draw(); };
+  };
+  draw();
+  await new Promise(r=>{ const h=()=>{ if(!picks.length) return; r(); }; document.addEventListener('click',function f(e){ if(e.target.closest('#go')){ document.removeEventListener('click',f); h(); } }); });
+
+  ui(`<div class="scene-h"><h2>放榜</h2><span class="muted">按 F5 的手在發抖</span></div><div class="results" id="res"></div><div class="btns" id="after"></div>`, true);
+  const res=$('#res');
+  let got=null;
+  for(const id of picks){
+    const sc=SCHOOLS.find(s=>s.id===id), p=admitPct(sc);
+    const row=document.createElement('div'); row.className='resrow';
+    row.innerHTML=`<span class="nm">${sc.name}</span><span class="muted">錄取率 ${p}%</span><span class="num roller">…</span><span class="out"></span>`;
+    res.appendChild(row);
+    const r=row.querySelector('.roller');
+    const v=rnd(1,100);
+    if(!REDUCED) for(let i=0;i<10;i++){ r.textContent=rnd(1,100); await wait(70); }
+    r.textContent=`擲出 ${v}`;
+    const ok=v<=p;
+    row.querySelector('.out').innerHTML=`<span class="stamp ${ok?'good':''}">${ok?'錄取':'落榜'}</span>`;
+    await wait(650);
+    if(ok){ got=sc; break; }
+  }
+  if(!got){
+    got=SCHOOLS[4];
+    const row=document.createElement('div'); row.className='resrow';
+    row.innerHTML=`<span class="nm">${got.name}</span><span class="muted">備取最後一名…</span><span class="out"><span class="stamp good">遞補上了！</span></span>`;
+    res.appendChild(row); await wait(600);
+  }
+  S.school=got;
+  $('#after').innerHTML=`<p style="width:100%">恭喜考上 <b class="hl">${got.name}</b>！${got.id==='S'?'全家族都在群組轉發了。':got.id==='D'?'山上空氣很好，聽說猴子會搶便當。':'至少有學校念了。'}</p><button class="btn primary" data-v="ok">去找指導教授 →</button>`;
+  await clickOnce($('#after'),'.btn');
+}
+
+function machineSVG(){
+  const caps=[[70,62,'#ffd4dd'],[100,52,'#d2e3ff'],[128,66,'#fff0a0'],[84,88,'#d2edcf'],[116,92,'#ffdcb8'],[100,74,'#ffd4dd'],[140,90,'#d2e3ff'],[62,92,'#fff0a0']];
+  return `<svg class="machine" viewBox="0 0 200 240" style="filter:url(#rough)">
+    <circle class="line" cx="100" cy="78" r="62" style="fill:#fbfcf8"/>
+    ${caps.map(c=>`<circle class="line" cx="${c[0]}" cy="${c[1]}" r="13" style="fill:${c[2]};stroke-width:2.4"/><path class="line" style="stroke-width:2" d="M${c[0]-13} ${c[1]}h26"/>`).join('')}
+    <path class="line" style="fill:#ffd4dd" d="M44 128h112l10 100H34z"/>
+    <circle class="line" cx="100" cy="166" r="16" style="fill:#fbfcf8"/><path class="line" d="M88 166h24"/>
+    <rect class="line" x="132" y="196" width="26" height="22" style="fill:#1f2d4a"/>
+    <text x="54" y="212" style="font:700 15px var(--hand);fill:#1f2d4a">指導教授</text></svg>`;
+}
+function rollProf(){
+  const x=Math.random()*100;
+  let r = x<10?'SSR':x<40?'SR':'R';
+  if(perk('pity') && r==='R') r='SR';
+  return pick(PROFS.filter(p=>p.r===r));
+}
+async function gacha(again=false){
+  ui(`<div class="scene-h"><h2>${again?'重新':''}轉蛋抽指導教授</h2><span class="muted">SSR 10%・SR 30%・R 60%。人生就是一場轉蛋。</span></div>
+    <div id="mwrap">${machineSVG()}</div>
+    <div class="center mt" id="gbtn"><button class="btn primary" data-v="spin">投一枚學費，轉一次</button></div>`, true);
+  await clickOnce($('#gbtn'),'.btn');
+  $('#gbtn').innerHTML='<p class="muted">喀啦喀啦……</p>';
+  const m=$('.machine'); m.classList.add('shake'); await wait(REDUCED?100:950);
+  const p=rollProf(); S.prof=p;
+  $('#mwrap').innerHTML=`<div class="note profcard" style="--r:-1deg">
+      <span class="rar ${p.r}">${p.r}</span>${icon(p.icon)}<h3>${p.name}</h3>
+      <span class="quote">「${p.quote}」</span><span class="flav">${p.desc}</span>
+      <div class="tags"><span class="tag">每學期壓力 ${p.pressure>0?'+':''}${p.pressure}</span><span class="tag">助學金 ${p.stipend} 萬</span><span class="tag">進度 ×${p.prog}</span></div></div>`;
+  $('#gbtn').innerHTML=`<button class="btn primary" data-v="ok">${p.r==='SSR'?'歐皇降臨！開學吧 →':p.r==='SR'?'還不錯，開學吧 →':'……好吧，開學吧 →'}</button>`;
+  await clickOnce($('#gbtn'),'.btn');
+}
+
+/* ================= actions (the cards you play each semester) ================= */
+const F = () => FIELDS[S.field];
+const ACTIONS = [
+  {id:'write',t:'寫論文',ic:'paper',f:'打開 Word，盯著游標閃兩小時。',h:['進度↑','精神↓'],st:'MPD',w:4,
+    run:()=>note('寫了三頁，刪了兩頁', pick(['至少檔名從 final.docx 變成 final_v2.docx 了。','你發現最難寫的是 Abstract，第二難的是其他全部。','寫到一半，Word 當掉了。幸好有自動儲存……的上一版。']), gain({prog:rnd(12,18),san:-4}),'paper')},
+  {id:'meet',t:'跟教授 meeting',ic:'prof',f:'帶著 slides 和求生意志。',h:['好感↑','精神?'],dice:'嘴砲',st:'MPD',w:3,
+    run:async()=>{
+      if(S.prof.id==='fly'&&Math.random()<.5) return note('教授在杜拜','meeting 改成視訊，網路延遲五秒，你們互相說了二十次「你先說」。',gain({favor:3,san:-2}),'plane');
+      if(S.prof.id==='zen') return note('教授不在','門上貼了一張紙條：「加油，我相信你。」',gain({favor:4,san:3}),'beach');
+      const r=await roll('talk',12,'跟教授報告進度');
+      if(r.ok) return note('教授點頭了！','「嗯，不錯，照這個方向做。」你走出辦公室時腳步都在飄。',gain({favor:10,prog:6}),'prof');
+      if(S.prof.id==='wind') return note('教授指向窗外','「八樓風很大，你去吹一下，想清楚再回來。」',gain({favor:-6,san:ouch(-9)}),'wind');
+      return note('教授沉默了五秒','「所以……你這禮拜到底做了什麼？」',gain({favor:-6,san:ouch(-8)}),'prof');
+    }},
+  {id:'submit',t:()=>F().sub,ic:'devil',f:()=>`把稿子丟進 ${F().venue}，祈禱別遇到 Reviewer 2。`,h:['論文↑','精神?'],dice:'腦力',st:'MPD',w:3,
+    run:async()=>{
+      const dc=14+S.school.dc+(S.stage==='phd'?1:S.stage==='pd'?2:0);
+      const r=await roll('skill',dc,`${F().sub}：${F().venue}`,[['教授加持',S.prof.paper],['AI 潤稿',has('ai')?2:0]]);
+      if(r.ok) return note('Accept！', pick(['你把錄取信截圖傳到家族群組，阿嬤問你什麼時候畢業。','Minor revision 之後就收了！教授在群組發了一個讚。','三位 reviewer 都說好。你懷疑系統是不是寄錯人了。']), gain({papers:1,prog:10,san:6,favor:8}),'paper');
+      return note('Reviewer 2 出現了', pick(['「作者顯然沒有讀過 [Reviewer2 et al., 2019]。」','「這個方法很有趣，但我不喜歡。Reject。」','「建議補做 15 組實驗，期限兩週。」','「英文需要請母語人士潤飾。」（審稿意見本身有三個文法錯誤）']), gain({san:ouch(-11)}),'devil');
+    }},
+  {id:'conf',t:'參加研討會',ic:'mic',f:'茶點好吃，海報很多，大神就在那裡。',h:['腦力↑','存款↓'],dice:'嘴砲',st:'MPD',w:2,
+    run:async()=>{
+      const r=await roll('talk',14,'鼓起勇氣找大神聊天');
+      if(r.ok) return note('交換名片成功！','大神說：「有興趣可以合作。」你把這句話重複講了一個月。',gain({money:-2,skill:1,prog:10,san:4}),'mic');
+      return note('茶點區常客','整場只跟茶點區的阿姨聊天。不過馬卡龍很好吃。',gain({money:-2,skill:1,san:3}),'hotpot');
+    }},
+  {id:'ta',t:'當助教',ic:'book',f:'改考卷、回信、被問「這會考嗎」。',h:['存款↑','精神↓'],st:'MP',w:2,
+    run:()=>note('助教的一學期','學生問了你 47 次「這會考嗎？」你回答了 47 次「會」。',gain({money:2,san:-6}),'book')},
+  {id:'rest',t:'去墾丁放空',ic:'beach',f:'教授以為你在跑實驗。',h:['精神↑↑','好感↓'],st:'MPD',w:3,
+    run:()=>note('海邊三天', pick(['你躺在沙灘上，第一次覺得 p-value 不重要。','手機關機三天。開機後有 87 則 Line，你選擇再關一天。','曬黑了。回實驗室時大家以為你換人了。']), gain({san:rnd(15,22),favor:-4}),'beach')},
+  {id:'night',t:'熬夜衝刺',ic:'coffee',f:'凌晨四點的研究室，只剩你和飲水機。',h:['進度↑↑','精神↓↓'],st:'MPD',w:3,
+    run:()=>note('天亮了','你聽到了早上第一班垃圾車的音樂，然後完成了一個 section。',gain({prog:rnd(22,27),san:-15}),'coffee')},
+  {id:'read',t:'讀論文',ic:'book',f:'讀 20 篇，看懂 2 篇。',h:['腦力↑','精神↓'],st:'MP',w:2,
+    run:()=>note('知識增加了', pick(['讀完 20 篇，發現 3 篇跟你撞題。','你終於看懂當初教授叫你讀的那篇，原來它是錯的。']), gain({skill:1,san:-3}),'book')},
+  {id:'scholar',t:'申請獎學金',ic:'money',f:'寫三千字自傳，證明你很窮又很優秀。',h:['存款?'],dice:'運氣',st:'MP',w:2,
+    run:async()=>{
+      const r=await roll('luck',13,'等評審結果');
+      if(r.ok) return note('獎學金下來了！','今晚的便當可以加滷蛋，而且是兩顆。',gain({money:5,san:3}),'money');
+      return note('感謝您的申請','「申請人非常優秀，但名額有限。」你已經收到第三封一模一樣的信。',gain({san:-3}),'mail');
+    }},
+  {id:'dinner',t:'實驗室聚餐',ic:'hotpot',f:'吃到飽火鍋，教授買單。',h:['精神↑','好感↑'],st:'MPD',w:2,
+    run:()=>note('坐在教授旁邊', '整晚只敢吃白飯。不過教授說你「很穩重」。',gain({san:8,money:-1,favor:4}),'hotpot')},
+  // CS
+  {id:'gpu',t:'跑實驗',ic:'gpu',f:'按下 Enter，祈禱顯卡沒被搶走。',h:['進度↑'],dice:'運氣',fd:'cs',st:'MP',w:3,
+    run:async()=>{
+      const r=await roll('luck',9,'nvidia-smi 有空位嗎？');
+      if(r.ok) return note('Loss 降了！','你對著螢幕鞠了一個躬。',gain({prog:20}),'chart');
+      return note('GPU 被學長佔走了','nvidia-smi 上八張卡全都是他的名字，跑的是 MNIST。',gain({prog:4,san:-5}),'gpu');
+    }},
+  {id:'tune',t:'調參數煉丹',ic:'fire',f:'learning rate 改成 3e-4，玄學。',h:['進度 0~35'],fd:'cs',st:'MP',w:2,
+    run:()=>{ const v=rnd(0,35); return note(v>25?'煉丹成功！':v<6?'煉出一坨 NaN':'有一點點進步', v>25?'你不知道為什麼會變好，但你決定不要問。':v<6?'loss 從 0.3 變成 NaN，再變成 inf。':'把 batch size 從 32 改成 64，準確率漲了 0.2%。', gain({prog:v,san:-2}),'fire'); }},
+  {id:'arxiv',t:'刷 arXiv',ic:'chart',f:'今天新增 312 篇。',h:['腦力↑','精神↓'],fd:'cs',st:'MPD',w:2,
+    run:()=>note('資訊焦慮','你看完了 312 篇的標題，記住了 0 篇。但腦袋似乎變大了一點。',gain({skill:1,san:-4}),'chart')},
+  {id:'deal',t:'接產學案',ic:'money',f:'廠商：「這可以用 AI 解決嗎？」',h:['存款↑','進度↓'],fd:'cs',st:'MPD',w:2,
+    run:()=>note('甲方的需求','他們要一個「什麼都能預測」的模型，下禮拜要 demo。',gain({money:4,prog:-4,favor:5,san:-3}),'money')},
+  {id:'kaggle',t:'參加 Kaggle',ic:'chart',f:'排行榜上的數字會說話。',h:['腦力↑','存款?'],dice:'腦力',fd:'cs',st:'MP',w:2,
+    run:async()=>{
+      const r=await roll('skill',15,'衝排行榜');
+      if(r.ok) return note('拿到銀牌！','履歷上多了一行，還有一點獎金。',gain({money:3,skill:2}),'chart');
+      return note('第 1,487 名','前面 1,486 名都是同一套 ensemble。',gain({san:-4,skill:1}),'chart');
+    }},
+  // Bio
+  {id:'cell',t:'養細胞',ic:'petri',f:'比照顧自己還用心。',h:['進度↑'],dice:'運氣',fd:'bio',st:'MP',w:3,
+    run:async()=>{
+      const r=await roll('luck',9,'打開培養箱');
+      if(r.ok) return note('細胞白白胖胖','長得比你還健康，你很欣慰也有點難過。',gain({prog:18}),'petri');
+      return note('汙染了','培養盤長出一片黴菌，在顯微鏡下其實滿美的。',gain({san:-8}),'petri');
+    }},
+  {id:'mouse',t:'老鼠實驗',ic:'rat',f:'牠們看著你，你也看著牠們。',h:['進度↑↑','精神↓'],fd:'bio',st:'MP',w:3,
+    run:()=>note('被咬了一口','老鼠咬了你的手指，你們互看了三秒，然後各自繼續工作。',gain({prog:24,san:-10}),'rat')},
+  {id:'western',t:'跑 Western',ic:'dna',f:'開獎時間到。',h:['進度 ?'],fd:'bio',st:'MP',w:2,
+    run:()=>{ const v=rnd(1,3);
+      if(v===1) return note('一片空白','底片上什麼都沒有，跟你的腦袋一樣。',gain({san:-6}),'dna');
+      if(v===2) return note('有帶，但是歪的','教授說：「這張先放 supplementary。」',gain({prog:10}),'dna');
+      return note('一條漂亮的帶！','你把它設成手機桌布。',gain({prog:28,san:4}),'dna'); }},
+  {id:'weekend',t:'週末回實驗室換液',ic:'flask',f:'週六早上，你和清潔阿姨很熟。',h:['好感↑','精神↓'],fd:'bio',st:'MP',w:2,
+    run:()=>note('週末也是工作天','清潔阿姨請你吃了一顆橘子。教授剛好路過，看到你在。',gain({prog:8,favor:6,san:-6}),'flask')},
+  {id:'vendor',t:'跟試劑廠商砍價',ic:'money',f:'業務請喝咖啡，你請他打折。',h:['存款↑'],fd:'bio',st:'MPD',w:2,
+    run:()=>note('變成好朋友','拿到一整箱贈品，還有三支免費的 pipette。',gain({money:2,san:2}),'money')},
+  // Postdoc
+  {id:'job',t:'投教職',ic:'office',f:'寄出 40 份 CV，每份都改了學校名稱。',h:['結局?'],dice:'論文',st:'D',w:0,
+    run:async()=>{
+      const r=await roll(null,26,'等待面試通知',[['論文',S.papers*2],['學校名氣',S.school.job],['嘴砲',Math.floor(S.st.talk/2)],['腦力',Math.floor(S.st.skill/3)]]);
+      if(r.ok){ await note('收到聘書了！！','電話那頭說：「歡迎加入我們系。」你掛掉電話後在走廊上跑了一圈。',[], 'office'); throw new EndGame('prof'); }
+      return note('感謝函收集中','收到 23 封信：「您非常優秀，但……」你把它們排成一面牆。',gain({san:ouch(-12)}),'mail');
+    }},
+  {id:'grantw',t:'寫計畫申請經費',ic:'money',f:'把同一個想法包裝成第五種樣子。',h:['存款?'],dice:'嘴砲',st:'D',w:2,
+    run:async()=>{
+      const r=await roll('talk',14,'審查委員會');
+      if(r.ok) return note('計畫通過！','三年經費到手，你終於可以買一張不會晃的椅子。',gain({money:6,san:4}),'money');
+      return note('未獲補助','審查意見：「題目太新」和「題目太舊」同時出現。',gain({san:-6}),'mail');
+    }},
+  {id:'mentor',t:'帶學弟妹',ic:'cap',f:'「學長姐，Git 要怎麼用？」',h:['進度↑','精神↓'],st:'PD',w:2,
+    run:()=>note('傳承','你教了三遍 git push，他們 push 到了 main。',gain({prog:10,san:-4,favor:3}),'cap')}
+];
+
+/* ================= random events ================= */
+const EVENTS = [
+  {id:'family',ic:'phone',t:'家族群組',x:'阿姨：「什麼時候畢業啊？隔壁小明已經在竹科買房了。」',o:[
+    ['「快了快了」',()=>note('已讀','這是你第三年說「快了」。',gain({san:-5}))],
+    ['轉移話題',async()=>{const r=await roll('talk',12,'轉移話題');return r.ok?note('成功','你分享了一篇養生文章，大家開始討論薑黃。',gain({san:2})):note('失敗','「不要轉移話題！你論文寫幾頁了？」',gain({san:-8}));}]]},
+  {id:'ig',ic:'money',t:'大學同學的 IG',x:'大學同學曬了新車，配文：「人生第一桶金 🚗」',o:[
+    ['按讚，然後默默關掉手機',()=>note('沒事的','你打開實驗記錄本，在空白處畫了一台車。',gain({san:-6}))]]},
+  {id:'senior',ic:'cap',t:'學長畢業了',x:'學長畢業了。實驗室的雜事、報帳、伺服器帳號，現在全部歸你。',o:[
+    ['「好的，交給我」',()=>note('新任實驗室管家','你多了五把鑰匙和一個「網管」的 Line 群組。',gain({san:-8,favor:6}))],
+    ['裝死',()=>note('裝死成功？','教授在 meeting 上問：「這些事現在誰在管？」全場看向你。',gain({favor:-6,san:2}))]]},
+  {id:'typhoon',ic:'wind',t:'颱風假',x:'全台放颱風假。教授在群組說：「實驗室沒有放假喔。」',o:[
+    ['冒著風雨去實驗室',()=>note('落湯雞','雨傘開花了，但教授看到你準時出現。',gain({prog:8,san:-6,favor:5}))],
+    ['在家耍廢',()=>note('颱風天就是要泡麵','你看了一整天的貓咪影片。',gain({san:10,favor:-3}))]]},
+  {id:'receipt',ic:'paper',t:'報帳退件',x:'發票抬頭寫錯了。會計室已經退件第三次。',o:[
+    ['重跑一次流程',()=>note('流程大師','你現在比會計還懂核銷規定。',gain({san:-6}))],
+    ['拜託會計小姐',async()=>{const r=await roll('talk',11,'裝可憐');return r.ok?note('會計小姐心軟了','她幫你改好，還給了你一顆糖。',gain({san:3})):note('鐵面無私','「規定就是規定。」',gain({san:-8}));}]]},
+  {id:'kid',ic:'ruler',t:'教授的請託',x:'教授：「我小孩的科展，你可以幫忙看一下嗎？」',o:[
+    ['接下來',()=>note('科展得獎了','是第一名。比你的論文還快拿到肯定。',gain({favor:10,san:-6}))],
+    ['婉拒',()=>note('教授：「喔，好。」','那個「喔」的語氣讓你睡不著。',gain({favor:-8}))]]},
+  {id:'cite',ic:'paper',t:'被引用了！',x:'Google Scholar 通知：你的論文被引用了！',c:()=>S.papers>0,o:[
+    ['點開來看',()=>note('仔細一看','是你自己引用的。但引用就是引用。',gain({san:5}))]]},
+  {id:'scoop',ic:'devil',t:'撞題了',x:'arXiv 上出現一篇跟你一模一樣的題目，連圖的配色都一樣。',o:[
+    ['宣稱我們更好',async()=>{const r=await roll('talk',13,'寫一段 related work');return r.ok?note('說服了自己','「我們的方法在第三個資料集上多了 0.3%。」',gain({prog:-4})):note('越描越黑','教授看完說：「乾脆換題目吧。」',gain({prog:-15,san:-5}));}],
+    ['哭一下',()=>note('哭完了','擦乾眼淚，進度條也一起被擦掉了一些。',gain({prog:-10,san:-4}))]]},
+  {id:'box',ic:'cap',t:'畢業學長留下的箱子',x:'角落有一個寫著「給有緣人」的紙箱。',o:[
+    ['打開看看',async()=>{ await relicPick('紙箱裡有……'); }]]},
+  {id:'blackout',ic:'fire',t:'停電了',x:()=>S.field==='cs'?'整棟停電，你上次存檔是三小時前。':'-80°C 冰箱停電了，裡面是你一整年的 sample！',o:[
+    ['衝去搶救',async()=>{const r=await roll('stamina',12,'百米衝刺');return r.ok?note('救回來了！','你抱著乾冰站在走廊上，像個英雄。',gain({san:-3,favor:4})):note('來不及了','你站在冰箱前默哀了一分鐘。',gain({prog:-15,san:-6}));}],
+    ['接受命運',()=>note('人生就是這樣','你去買了一杯珍奶。',gain({prog:-12,san:-2}))]]},
+  {id:'jog',ic:'gym',t:'健康檢查報告',x:'體檢報告上一片紅字。醫生說：「你才幾歲？」',o:[
+    ['開始去跑步',()=>note('跑了三圈','喘到不行，但腦袋清醒多了。',gain({san:6,stamina:1}))],
+    ['明天再說',()=>note('明天','明天永遠是明天。',gain({san:-2}))]]},
+  {id:'love',ic:'cat',t:'實驗室外面的世界',x:'有人約你週末去看電影。你上次看電影是大學的時候。',o:[
+    ['去約會',()=>note('原來外面有陽光','你發現世界上還有不談 baseline 的對話。',gain({san:12,prog:-5}))],
+    ['「我要做實驗」',()=>note('做實驗','實驗也沒有成功。',gain({san:-3,favor:2}))]]},
+  {id:'rev2',ic:'devil',t:'Reviewer 2 回來了',x:'「感謝作者的回覆。但我還是建議補做 10 組實驗。」',c:()=>S.papers>0||S.prog>30,o:[
+    ['乖乖補',()=>note('補完了','十組實驗，三週，兩箱泡麵。',gain({prog:-6,san:-6,skill:1}))],
+    ['據理力爭',async()=>{const r=await roll('talk',14,'撰寫 rebuttal');return r.ok?note('Reviewer 被說服了','「作者的回覆說服了我。」這是你第一次在現實中看到這句話。',gain({san:5,skill:1})):note('火上加油','Reviewer 2 追加了五組實驗。',gain({san:ouch(-10)}));}]]},
+  {id:'boba',ic:'boba',t:'學弟請喝飲料',x:'學弟拿著一杯半糖少冰的珍奶：「學長姐辛苦了。」',o:[
+    ['感動收下',()=>note('人間溫暖','你喝完後多活了一個禮拜。',gain({san:7}))]]},
+  // CS
+  {id:'google',ic:'gpu',fd:'cs',t:'被大公司先發了',x:'Google 剛發表了跟你一樣的方法，用了 4096 張 TPU。',o:[
+    ['轉題目',()=>note('重新開始','你從頭讀起，但這次讀得比較快。',gain({prog:-12,skill:1}))],
+    ['cite 它，說我們比較省電',async()=>{const r=await roll('talk',12,'寫 motivation');return r.ok?note('綠色 AI！','「我們只用了一張 3090。」審稿人覺得很感人。',gain({prog:5})):note('沒人在乎電費','Reviewer：「請跟 Google 的方法比較。」',gain({prog:-8,san:-5}));}]]},
+  {id:'seed',ic:'chart',fd:'cs',t:'random seed = 42',x:'你把 random seed 改成 42，結果變好了。',o:[
+    ['不要問為什麼',()=>note('宇宙的答案','銀河便車指南誠不欺我。',gain({prog:14}))]]},
+  {id:'mining',ic:'server',fd:'cs',t:'伺服器在挖礦',x:'你發現實驗室的伺服器有人在偷挖礦。',o:[
+    ['跟教授報告',()=>note('抓到了','是隔壁實驗室的。教授說你很細心。',gain({favor:6}))],
+    ['一起挖',async()=>{const r=await roll('luck',13,'不被發現');return r.ok?note('賺了一點','電費是學校出的。',gain({money:3})):note('被發現了','教授：「……」',gain({favor:-14,money:1}));}]]},
+  {id:'legacy',ic:'server',fd:'cs',t:'學長的程式碼',x:'變數名稱叫 a、aa、aaa，檔名叫 final_final_v3_真的最後.py。',o:[
+    ['硬著頭皮讀',()=>note('考古學家','讀懂了。你覺得自己可以去挖恐龍了。',gain({san:-6,skill:1}))]]},
+  // Bio
+  {id:'babies',ic:'rat',fd:'bio',t:'老鼠生寶寶了',x:'半夜十二點，動物房通知：你的老鼠生了一窩。',o:[
+    ['馬上去處理',()=>note('凌晨的動物房','你數了 11 隻小老鼠，每一隻都比你有精神。',gain({san:-6,prog:6}))],
+    ['明天再說',async()=>{const r=await roll('luck',12,'祈禱');return r.ok?note('沒事','母鼠是專業的。',gain({san:2})):note('出事了','動物房的學姊打了 9 通電話給你。',gain({san:-8,favor:-4}));}]]},
+  {id:'antibody',ic:'money',fd:'bio',t:'抗體好貴',x:'一管抗體兩萬塊，只夠做 20 次實驗。',o:[
+    ['咬牙買下',()=>note('刷卡了','你看著那管抗體，像看著自己的存款。',gain({money:-2,prog:8}))],
+    ['去隔壁 lab 借',async()=>{const r=await roll('talk',12,'借東西');return r.ok?note('借到了！','你欠了隔壁一盒蛋捲。',gain({prog:6})):note('「我們也剩不多」','對方教授還順便問你是哪個實驗室的。',gain({san:-4}));}]]},
+  {id:'lost',ic:'flask',fd:'bio',t:'Sample 不見了',x:'學妹清冰箱的時候，把你標著「勿丟」的 sample 丟了。',o:[
+    ['原諒她',()=>note('大人有大量','學妹感動地請你吃了一個禮拜的午餐。',gain({prog:-10,san:3}))],
+    ['深呼吸十次',()=>note('呼……','你寫了一個「冰箱使用規則」貼在門上。',gain({prog:-10,san:-4}))]]},
+  {id:'pcr',ic:'dna',fd:'bio',t:'PCR 成功',x:'一次就跑出你要的大小，沒有引子二聚體。',o:[
+    ['截圖傳給全實驗室',()=>note('今天是好日子','你決定今天不再碰任何東西，以免破壞運氣。',gain({prog:14,san:4}))]]},
+  // Professor-specific
+  {id:'w-window',ic:'wind',pf:'wind',t:'八樓的窗',x:'教授打開窗戶：「八樓風很大，吹一吹，清醒一下。」',o:[
+    ['「真的好涼……」',()=>note('清醒了','你在風中想通了 related work 該怎麼寫。',gain({favor:6,san:-4,prog:4}))],
+    ['「老師，我先回去改」',()=>note('逃離八樓','電梯門關上的那一刻，你鬆了一口氣。',gain({prog:6,favor:-2}))]]},
+  {id:'w-draft',ic:'wind',pf:'wind',t:'草稿飛走了',x:'meeting 時窗戶沒關，你的論文草稿從八樓飛了出去。',o:[
+    ['看著它飛',()=>note('在空中很美','教授：「沒關係，反正本來就要重寫。」',gain({prog:-8,san:-3}))]]},
+  {id:'l-line',ic:'phone',pf:'line',t:'03:12',x:'手機亮了。教授：「睡了嗎？明天早上 8 點 meeting，順便把實驗跑完。」',o:[
+    ['秒回「好的老師」',()=>note('不用睡了','你決定直接熬夜到 meeting。',gain({favor:8,san:-9,prog:6}))],
+    ['已讀不回，繼續睡',()=>note('早上 7:58','你看到訊息，用跑百米的速度衝去實驗室。',gain({favor:-6,san:2}))]]},
+  {id:'f-dubai',ic:'plane',pf:'fly',t:'教授從杜拜來信',x:'「我看了你的 slides，很好。」（已讀紀錄顯示他只看了第一頁）',o:[
+    ['回「謝謝老師」',()=>note('保持神秘','你們維持著這種默契。',gain({favor:4,san:2}))]]},
+  {id:'b-move',ic:'office',pf:'boss',t:'教授要搬研究室',x:'「這週末有空嗎？我有幾箱書要搬。」幾箱是 46 箱。',o:[
+    ['捲起袖子',()=>note('搬家公司','你搬了一整天，拿到一個便當和五百元。',gain({san:-8,favor:8,money:1}))],
+    ['「我週末要回家」',()=>note('全實驗室只有你沒去','週一的空氣有點冷。',gain({favor:-7}))]]},
+  {id:'z-miss',ic:'beach',pf:'zen',t:'教授呢？',x:'你發現自己已經三個月沒見到教授了。',o:[
+    ['主動約 meeting',()=>note('教授很驚喜','「喔，你是……對對對，最近怎麼樣？」',gain({favor:8,prog:5}))],
+    ['享受自由',()=>note('自由的空氣','你把研究室的植物養得很好。',gain({san:8}))]]},
+  {id:'g-nature',ic:'prof',pf:'god',t:'這可以投 Nature',x:'教授看完你的初步結果：「這可以投 Nature，兩週內寫出來。」',o:[
+    ['衝！',async()=>{const r=await roll('skill',18,'兩週寫完 Nature',[['教授加持',3]]);return r.ok?note('真的上了！','你的名字出現在 Nature 上。阿嬤終於不問你什麼時候畢業了。',gain({papers:2,prog:15,favor:10})):note('Desk reject','編輯三小時就回信了。',gain({san:ouch(-12),skill:1}));}],
+    ['「老師，可以先投子刊嗎」',()=>note('教授有點失望','「你就是不夠有野心。」',gain({favor:-5}))]]},
+  {id:'k-tea',ic:'boba',pf:'kind',t:'教授請喝珍奶',x:'教授拎著一整袋飲料進來：「大家辛苦了，休息一下。」',o:[
+    ['選全糖',()=>note('幸福','這間實驗室最棒的地方就是教授。',gain({san:10,favor:3}))]]},
+  {id:'n-tenure',ic:'hourglass',pf:'new',t:'Tenure 倒數',x:'教授：「我今年要送升等，我們一起拚！」',o:[
+    ['一起拚',()=>note('拚了','你的進度和教授的黑眼圈同步增加。',gain({prog:12,san:-10,favor:6}))],
+    ['「老師加油」',()=>note('精神支持','教授看了你一眼。',gain({favor:-4}))]]},
+  // Rare
+  {id:'hunt',ic:'plane',st:'P',rare:true,t:'一封來自大廠的信',x:()=>S.field==='cs'?'「我們讀了你的論文，想邀請你加入我們的研究團隊。年薪是你教授的四倍。」':'「我們對你的研究很有興趣，願意投資你成立新創公司。」',c:()=>S.papers>=2,o:[
+    ['馬上答應',async()=>{ throw new EndGame('headhunt'); }],
+    ['拒絕，我要拿到學位',()=>note('教授感動了','教授請你吃了一頓牛排，還說要幫你寫推薦信。',gain({favor:12,san:5}))]]},
+  {id:'pd-q',ic:'question',st:'D',t:'學弟妹的提問',x:'碩一學弟：「學長姐，博後到底是什麼？」',o:[
+    ['「是博士的後面」',()=>note('很有道理','學弟點點頭，你也點點頭。',gain({san:3}))],
+    ['「是一種修行」',()=>note('學弟害怕了','他隔天去問了竹科的實習。',gain({san:-2}))]]}
+];
+
+/* ================= relic pick ================= */
+async function relicPick(heading){
+  const pool=shuffle(RELICS.filter(r=>!has(r.id) && (!r.field||r.field===S.field))).slice(0,3);
+  if(!pool.length) return note(heading,'空的。看來前人已經把好東西都拿走了。',[]);
+  const i=await modal(`<h2>${heading}</h2><p class="muted">選一個帶走</p>`, pool.map(r=>`${icon(r.icon,'sm')} <span><b>${r.name}</b><br><small class="muted">${r.desc}</small></span>`), true, 'cap');
+  const r=pool[i]; S.relics.push(r.id); r.get && r.get(); refresh(['relics']);
+}
+
+/* ================= semester loop ================= */
+function semDots(){
+  const max={ms:6,phd:14,pd:6}[S.stage], norm={ms:4,phd:8,pd:6}[S.stage];
+  let s='';
+  for(let i=1;i<=max;i++) s+=`<i class="${i>norm?'over':''} ${i<S.sem?'past':i===S.sem?'now':''}" title="${i>norm?'延畢區':''}"></i>`;
+  return `<div class="semdots" aria-label="第 ${S.sem} 學期，共 ${max} 學期">${s}</div>`;
+}
+function goalText(){
+  if(S.stage==='ms') return `目標：學位進度 100 → 碩士口試（碩二下前完成，最晚碩三下）`;
+  if(S.stage==='phd') return !S.qual ? `目標：博二下要考資格考・畢業需要進度 100 且論文 ≥ 2 篇` : `目標：進度 100、論文 ≥ 2 篇 → 博士口試（最晚博七下）`;
+  return `目標：累積論文，投教職。草稿進度滿 100 自動變成一篇論文。`;
+}
+function drawCards(){
+  const pool=ACTIONS.filter(a=>a.st.includes({ms:'M',phd:'P',pd:'D'}[S.stage]) && (!a.fd||a.fd===S.field) && a.w>0);
+  const out=[];
+  if(S.stage==='pd') out.push(ACTIONS.find(a=>a.id==='job'));
+  const bag=[...pool];
+  while(out.length<3 && bag.length){
+    const tot=bag.reduce((s,a)=>s+a.w,0); let x=Math.random()*tot;
+    const i=bag.findIndex(a=>(x-=a.w)<0);
+    out.push(bag.splice(i<0?0:i,1)[0]);
+  }
+  return shuffle(out);
+}
+const val = v => typeof v==='function' ? v() : v;
+
+async function playAction(step){
+  const cards=drawCards();
+  ui(`<div class="sem-head"><h2 class="semname ${step===0?'flip':''}">${semName()}</h2>
+      <span class="steps">行動 ${[0,1].map(i=>`<i class="${i<=step?'on':''}"></i>`).join('')}</span></div>
+    ${semDots()}<p class="goal muted">${goalText()}</p>
+    <div class="cards">${cards.map((a,i)=>`<button class="note" data-i="${i}" style="--r:${tilt()};--c:${NOTE_COLORS[(i+step*2+S.total)%5]};--d:${i*.07}s">
+      ${icon(a.ic)}<h3>${val(a.t)}</h3><span class="flav">${val(a.f)}</span>
+      <span class="tags">${a.dice?`<span class="tag dice">🎲 ${a.dice}</span>`:''}${a.h.map(x=>`<span class="tag">${x}</span>`).join('')}</span></button>`).join('')}</div>`);
+  const i=await clickOnce($('#stage'),'button.note');
+  await cards[+i].run();
+  checkFail();
+}
+async function randomEvent(){
+  const stg={ms:'M',phd:'P',pd:'D'}[S.stage];
+  let pool=EVENTS.filter(e=>(!e.fd||e.fd===S.field)&&(!e.pf||e.pf===S.prof.id)&&(!e.st||e.st.includes(stg))&&(!e.c||e.c()));
+  const fresh=pool.filter(e=>!S.seen[e.id]);
+  if(fresh.length) pool=fresh;
+  const tot=pool.reduce((s,e)=>s+(e.rare?.6:e.pf?3:2),0); let x=Math.random()*tot;
+  const ev=pool.find(e=>(x-=(e.rare?.6:e.pf?3:2))<0)||pool[0];
+  S.seen[ev.id]=1;
+  const i=await modal(`<p class="muted">突發事件</p><h2>${ev.t}</h2><p>${val(ev.x)}</p>`, ev.o.map(o=>o[0]), ev.o.length>1, ev.ic);
+  await ev.o[i][1]();
+  checkFail();
+}
+async function semesterEnd(){
+  const pd=S.stage==='pd';
+  const cost=pd?3:2, inc=(pd?5:S.prof.stipend)+(has('grant')?1:0);
+  const regen=(has('coffee')?4:0)+(has('chair')?3:0)+(has('cat')?5:0);
+  const press=S.school.pressure+S.prof.pressure;
+  const ds=gain({money:inc-cost, san:regen-press, favor:-S.prof.decay});
+  await note(`${semName()} 結束`, `生活費 −${cost} 萬，${pd?'薪水':'助學金'} +${inc} 萬。${S.school.name}的壓力加上${S.prof.name}教授的關愛，精神${press-regen>0?'又被磨掉一些':'居然恢復了'}。`, ds, 'hourglass');
+  checkFail();
+}
+
+/* ================= bosses ================= */
+const QS = {
+  all:['這跟 ChatGPT 有什麼不一樣？','所以這個研究有什麼用？','我沒看懂第三章，你可以再講一次嗎？','請問你的 novelty 在哪裡？','這個問題我十年前就做過了，你知道嗎？','你的 Figure 5 字太小了，我看不到。','如果資料多十倍，結果會怎麼樣？','你的結論好像跟你的標題沒有關係？'],
+  cs:['你的 baseline 為什麼不跟今年的方法比？','這個 0.3% 的提升，有做顯著性檢定嗎？','你有試過把模型再加大嗎？'],
+  bio:['n = 3 你覺得夠嗎？','這個 p-value 是怎麼算出來的？','你的 control 組在哪裡？']
+};
+function committeeSVG(mood=0){
+  const face=(x,glasses,hair,m)=>`<circle class="line" cx="${x}" cy="62" r="26" style="fill:#fff6ea"/>
+    ${glasses?`<circle class="line" cx="${x-9}" cy="60" r="6"/><circle class="line" cx="${x+9}" cy="60" r="6"/><path class="line" d="M${x-3} 60h6"/>`:`<circle cx="${x-9}" cy="60" r="3" fill="#1f2d4a"/><circle cx="${x+9}" cy="60" r="3" fill="#1f2d4a"/>`}
+    ${hair?`<path class="line" d="M${x-24} 52q4-20 24-20q20 0 24 20"/>`:`<path class="line" d="M${x-12} 38q12-6 24 0"/>`}
+    <path class="line" d="${m>0?`M${x-8} 74q8 7 16 0`:m<0?`M${x-8} 78q8-7 16 0`:`M${x-8} 76h16`}"/>
+    <path class="line" style="fill:#c7cfdd" d="M${x-30} 130q2-38 30-40q28 2 30 40z"/>`;
+  return `<svg class="committee" viewBox="0 0 420 150" style="filter:url(#rough)">
+    ${face(80,true,false,mood)}${face(210,false,true,mood)}${face(340,true,true,mood)}
+    <path class="line" style="fill:#d2b48c" d="M10 118h400v26H10z"/>
+    <path class="line" d="M180 130h60" /><text x="210" y="140" text-anchor="middle" style="font:700 12px var(--hand);fill:#1f2d4a">口試委員</text></svg>`;
+}
+async function boss(kind){
+  const cfg={ms:{n:'碩士學位口試',dc:12},qual:{n:'博士資格考',dc:14},phd:{n:'博士學位口試',dc:15}}[kind];
+  const dc=cfg.dc+S.school.dc;
+  await modal(`<p class="muted">BOSS</p><h2>${cfg.n}</h2><p>三位委員會輪流發問，答對兩題就過關。答題方式會決定你擲骰用哪個屬性。</p>`, ['深呼吸，上吧'], false, 'prof');
+  const qs=shuffle([...QS.all,...QS[S.field]]).slice(0,3);
+  let win=0, lose=0, mood=0;
+  for(let q=0;q<3 && win<2 && lose<2;q++){
+    ui(`<div class="scene-h"><h2>${cfg.n}</h2><span class="muted">第 ${q+1} 題</span></div>
+      ${committeeSVG(mood)}
+      <div class="bubble">「${qs[q]}」</div>
+      <div class="score">${'⭕'.repeat(win)}${'❌'.repeat(lose)}${'・'.repeat(3-win-lose)}</div>
+      <div class="cards">
+        <button class="note" data-v="skill" style="--r:${tilt()};--c:var(--n-blue)">${icon('book')}<h3>認真回答</h3><span class="flav">用實力說話。</span><span class="tags"><span class="tag dice">🎲 腦力 ${S.st.skill}</span></span></button>
+        <button class="note" data-v="talk" style="--r:${tilt()};--c:var(--n-yellow);--d:.07s">${icon('mic')}<h3>打太極</h3><span class="flav">「這是一個很好的問題……」</span><span class="tags"><span class="tag dice">🎲 嘴砲 ${S.st.talk}</span></span></button>
+        <button class="note" data-v="favor" style="--r:${tilt()};--c:var(--n-pink);--d:.14s">${icon('prof')}<h3>轉頭看教授</h3><span class="flav">用眼神求救。</span><span class="tags"><span class="tag dice">🎲 教授好感 ${Math.floor(S.favor/10)}</span></span></button>
+      </div>`);
+    const how=await clickOnce($('#stage'),'button.note');
+    const r=await roll(how,dc,'回答口委',[['考古題',has('exam')?3:0]]);
+    const txt={skill:['口委：「嗯……合理。」','口委皺眉，在紙上畫了一個大大的問號。'],talk:['口委被你繞暈了，點點頭說：「好，下一題。」','口委：「你沒有回答我的問題。」'],favor:['教授幫你擋下來：「這部分我們之後會補。」','教授正在滑手機，沒看到你的眼神。']}[how];
+    if(r.ok){ win++; mood=1; await note('過了！',txt[0],[]); }
+    else { lose++; mood=-1; await note('糟了',txt[1],gain({san:ouch(-6)})); checkFail(); }
+  }
+  const pass=win>=2;
+  if(pass){ await modal(`<h2>恭喜通過${cfg.n}！</h2><p>委員們在單子上簽了名。你走出口試教室時，學弟妹已經準備好蛋糕和氣球。</p>${deltaHTML(gain({skill:1,san:10,favor:5}))}`,['太好了'],false,'cap'); }
+  return pass;
+}
+
+/* ================= milestones ================= */
+async function milestones(){
+  if(S.stage==='ms'){
+    if(S.prog>=100 && S.sem>=3){
+      const ok=await boss('ms');
+      if(!ok){ await note('口試沒過','委員要求大修，你得延畢一學期。',gain({prog:-20,san:-10})); checkFail(); }
+      else {
+        await relicPick('畢業禮物');
+        const c=await modal(`<h2>碩士畢業了！</h2><p>接下來呢？</p>`, ['繼續讀博士（同一位教授）','讀博士，但換一位教授（重新轉蛋）','去竹科上班'], true, 'cap');
+        if(c===2) throw new EndGame('tsmc');
+        if(c===1) await gacha(true);
+        S.stage='phd'; S.sem=0; S.prog=0; renderHud(); refresh();
+        return;
+      }
+    }
+    if(S.sem===4 && !S.warned){ S.warned=true; await note('延畢了','你正式成為碩三生。學弟妹開始用敬語跟你說話。',gain({san:-5}),'hourglass'); checkFail(); }
+    if(S.sem>=6) throw new EndGame('chicken');
+  }
+  else if(S.stage==='phd'){
+    if(!S.qual && S.sem>=4){
+      const ok=await boss('qual');
+      if(ok) S.qual=true;
+      else { S.qualFail++; if(S.qualFail>=2) throw new EndGame('qualfail'); await note('資格考沒過','還有一次機會，下學期再考。',gain({san:-10}),'question'); checkFail(); }
+    }
+    if(S.qual && S.prog>=100 && S.sem>=6){
+      if(S.papers<2){ if(!S.paperWarn){ S.paperWarn=true; await note('論文不夠','學位進度滿了，但畢業門檻是兩篇論文。快去投稿！',[],'paper'); } }
+      else {
+        const ok=await boss('phd');
+        if(!ok){ await note('口試沒過','委員要求再補一章，延畢一學期。',gain({prog:-20,san:-10})); checkFail(); }
+        else {
+          await relicPick('博士畢業禮物');
+          const c=await modal(`<h2>你是博士了！</h2><p>名片上終於可以印 Ph.D.。接下來呢？</p>`, ['去當博士後研究員，挑戰教職','去業界'], true, 'cap');
+          if(c===1) throw new EndGame('drind');
+          S.stage='pd'; S.sem=0; S.prog=0; renderHud(); refresh();
+          return;
+        }
+      }
+    }
+    if(S.sem>=14) throw new EndGame('seven');
+  }
+  else if(S.stage==='pd'){
+    if(S.sem>=6) throw new EndGame('cafe');
+  }
+}
+
+/* ================= main run ================= */
+async function play(){
+  renderHud(); refresh();
+  if(S.perk==='legacy') await relicPick('學長的遺產');
+  if(!META.tut){ META.tut=true; saveMeta(); await modal(`<h2>開學了！</h2><p>每學期選 <b class="hl">兩張卡</b>，之後可能會有突發事件。</p><p>左邊的小人就是你：頭髮越少，精神越差。<b>精神、存款、教授好感</b>任何一個歸零，人生就提早結束。</p>`,['我準備好了'],false,'cap'); }
+  while(true){
+    S.sem++; S.total++;
+    refresh();
+    for(let step=0;step<2;step++) await playAction(step);
+    if(Math.random()<.6) await randomEvent();
+    await semesterEnd();
+    await milestones();
+  }
+}
+
+async function ending(id){
+  const e=ENDINGS[id];
+  let story=e.x;
+  if(id==='headhunt') story = S.field==='cs' ? '你連口試都沒考，就飛去加州的大公司了。教授在臉書上分享了你的新聞，標題是「我的學生」。' : '藥廠投資你開了一間新創公司。你成了老闆，換你寫計畫給別人審。';
+  const first=!META.endings.includes(id);
+  const earned=S.total + S.papers*2 + e.tier*2;
+  META.scars+=earned; META.runs++;
+  if(first) META.endings.push(id);
+  saveMeta();
+  $('#side').hidden=true;
+  ui(`<div class="cert">
+      <span class="stamp ${e.good?'good':''}">${e.good?'恭喜':'結局'}</span>
+      <p class="muted">${S.school?S.school.name:''}・${S.field?FIELDS[S.field].name:''}　結局 ${END_ORDER.indexOf(id)+1} / ${END_ORDER.length}${first?'　<b class="hl">新結局！</b>':''}</p>
+      ${icon(e.ic)}
+      <h2>${e.t}</h2>
+      <p class="story">${story}</p>
+      <div class="stats"><span>撐了 ${S.total} 個學期</span><span>論文 ${S.papers} 篇</span><span>指導教授：${S.prof?S.prof.name:'—'}</span><span>道具 ${S.relics.length} 個</span></div>
+      <p class="mt">獲得學術傷疤 <b class="num">+${earned}</b>（共 ${META.scars}）</p>
+      ${e.care?'<p class="care">遊戲外的小提醒：真的撐不住的時候，找人聊聊。台灣安心專線 1925。</p>':''}
+    </div>
+    <div class="btns" style="justify-content:center"><button class="btn primary" id="again">再投胎一次</button><button class="btn" id="back">回到封面</button></div>`, true);
+  $('#again').onclick=()=>run();
+  $('#back').onclick=()=>title();
+}
+
+async function run(){
+  S=newState();
+  $('#hud').hidden=true; $('#side').hidden=true;
+  try{
+    await rollStats();
+    await chooseField();
+    await applySchools();
+    await gacha();
+    await play();
+  }catch(e){
+    if(e instanceof EndGame){ $('#modal').hidden=true; $('#dice').hidden=true; await ending(e.id); }
+    else { console.error(e); throw e; }
+  }
+}
+
+title();
+</script>
+
+</body>
+</html>
