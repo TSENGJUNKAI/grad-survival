@@ -247,6 +247,21 @@ button.note:hover{transform:rotate(0deg) translateY(-7px) scale(1.03);box-shadow
 .cert .stamp{position:absolute;right:18px;top:18px}
 .care{margin-top:14px;font-size:.92rem;background:var(--n-green);display:inline-block;padding:6px 12px;transform:rotate(-1deg)}
 
+.pow{font-family:var(--hand);font-weight:700;font-size:clamp(5rem,22vw,9rem);color:var(--red);line-height:1;
+  -webkit-text-stroke:3px var(--ink);text-shadow:6px 6px 0 var(--hl);transform:rotate(-12deg);animation:pow .5s cubic-bezier(.2,1.8,.4,1) backwards}
+@keyframes pow{from{transform:rotate(-30deg) scale(.2);opacity:0}}
+body.quake #app{animation:quake .45s linear 2}
+@keyframes quake{0%,100%{transform:none}20%{transform:translate(-9px,4px) rotate(-1deg)}40%{transform:translate(8px,-5px) rotate(1deg)}60%{transform:translate(-6px,-3px)}80%{transform:translate(5px,5px)}}
+.page ul{margin:6px 0;padding-left:1.2em}
+.page li{margin:3px 0}
+.rv{margin:8px 0;padding:6px 10px;border-left:3px solid var(--pencil);background:rgba(221,231,240,.35)}
+.rv b{display:block;font-size:.85rem;color:var(--pencil)}
+.rv.r2{border-left-color:var(--red)}
+.page.night{background-color:#1d2438;color:#e8ecf5;
+  background-image:linear-gradient(90deg,transparent 46px,#6b3a4a 46px,#6b3a4a 48px,transparent 48px),linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px)}
+.page.night .muted{color:#9aa6c4}
+.page.night .pic{color:#e8ecf5}
+.page.night .btn{background:#2a3350;color:#e8ecf5;border-color:#e8ecf5;box-shadow:3px 3px 0 #e8ecf5}
 .snd{position:fixed;z-index:60;right:max(16px, env(safe-area-inset-right, 0px));bottom:calc(16px + env(safe-area-inset-bottom, 0px));
   display:flex;align-items:center;gap:6px;cursor:pointer;background:var(--n-blue);border:2.5px solid var(--ink);
   border-radius:20px 8px 20px 8px;padding:4px 12px 4px 8px;font-size:.9rem;font-weight:700;box-shadow:2px 2px 0 var(--ink);transform:rotate(-2deg)}
@@ -445,6 +460,7 @@ const IC = {
   ruler:`<path d="M6 44L44 6l14 14l-38 38z"/><path d="M16 34l5 5M22 28l3 3M28 22l5 5M34 16l3 3M40 10l5 5"/>`,
   office:`<rect x="10" y="8" width="44" height="50"/><path d="M10 20h44M18 30h8M38 30h8M18 42h8M38 42h8M28 58V48h8v10"/><path d="M48 14l8-4" />`,
   question:`<path d="M22 22q0-12 11-12t11 11q0 7-8 10q-4 2-4 8"/><circle cx="32" cy="50" r="2.5" fill="currentColor"/>`,
+  ghost:`<path d="M14 58V28a18 18 0 0 1 36 0v30l-6-5l-6 5l-6-5l-6 5l-6-5z"/><circle cx="26" cy="28" r="3" fill="currentColor"/><circle cx="38" cy="28" r="3" fill="currentColor"/><path d="M28 38q4 4 8 0"/>`,
   printer:`<rect x="8" y="24" width="48" height="22" rx="3"/><path d="M18 24V8h28v16M18 40h28v18H18zM24 48h16M24 53h10"/><circle cx="49" cy="31" r="1.8" fill="currentColor"/>`,
   bird:`<path d="M12 36q0-16 18-16q10 0 14 8l10-2l-8 7q0 17-18 17q-16 0-16-14z"/><circle cx="38" cy="28" r="1.8" fill="currentColor"/><path d="M20 38q8 6 18-2M26 50l-2 8M34 50l2 8"/>`,
   dog:`<path d="M16 30q0-16 16-16t16 16v8q0 14-16 14T16 38z"/><path d="M16 26q-8 2-8 14q4 2 8-4M48 26q8 2 8 14q-4 2-8-4"/><circle cx="26" cy="30" r="2" fill="currentColor"/><circle cx="38" cy="30" r="2" fill="currentColor"/><path d="M29 38h6l-3 3zM32 41v3q-4 3-6 0M32 44q4 3 6 0"/>`,
@@ -623,10 +639,10 @@ function clickOnce(root, sel){
     root.querySelectorAll(sel).forEach(el=>el.addEventListener('click',()=>{ if(done||el.disabled) return; done=true; res(el.dataset.v ?? el.dataset.i); }));
   });
 }
-function modal(inner, btns=['繼續'], col=false, pic=null){
+function modal(inner, btns=['繼續'], col=false, pic=null, cls=''){
   return new Promise(res=>{
     const m=$('#modal');
-    m.innerHTML=`<div class="page" role="dialog" aria-modal="true">${pic?`<svg class="ic pic" viewBox="0 0 64 64">${IC[pic]||IC.question}</svg>`:''}${inner}
+    m.innerHTML=`<div class="page ${cls}" role="dialog" aria-modal="true">${pic?`<svg class="ic pic" viewBox="0 0 64 64">${IC[pic]||IC.question}</svg>`:''}${inner}
       <div class="btns ${col?'col':''}">${btns.map((b,i)=>`<button class="btn ${i===0&&!col?'primary':''}" data-i="${i}">${b}</button>`).join('')}</div></div>`;
     m.hidden=false;
     const bs=[...m.querySelectorAll('.btns .btn')];
@@ -931,6 +947,41 @@ async function gacha(again=false){
 
 /* ================= actions (the cards you play each semester) ================= */
 const F = () => FIELDS[S.field];
+
+/* reviewer comments: R1 is nice, R2 is R2, R3 is a wildcard */
+const RV = {
+  r1good:['寫得很清楚，推薦接受。','很有趣的研究，我讀得很開心。','Strong accept！我已經轉寄給我的學生參考了。','好。（全文只有一個字）','雖然我不太懂，但看起來很厲害。Accept。','終於有人做這個了，謝謝你。','這是我今年審過最好的論文，雖然我今年只審了這一篇。'],
+  r2bad:[
+    '作者顯然沒有讀過 [Reviewer2 et al., 2019]、[Reviewer2 et al., 2020] 和 [Reviewer2 et al., 2021]。',
+    '這個方法很有趣，但我不喜歡。',
+    '建議補做 15 組實驗，期限兩週。',
+    '英文需要請母語人士潤飾。（這段審稿意見本身有三個文法錯誤）',
+    'Figure 3 的配色讓我想起我的前任，建議修改。',
+    '我沒有讀完，但我覺得不行。',
+    '本研究的貢獻相當於在大海裡加了一滴水，而且是自來水。',
+    '請比較所有現存的方法，包括明天才會發表的那些。',
+    'Novelty 不足。這個想法我上週在夢裡就想到了。',
+    '這篇論文太長了。也太短了。',
+    '請說明為什麼不使用量子電腦。',
+    'Reject，理由請見附件。（沒有附件）',
+    '作者使用 Times New Roman，顯示其研究態度不夠嚴謹。',
+    '結果太好了，好到讓人懷疑。',
+    'Abstract 的第一句話我就不同意了，所以後面我沒看。',
+    '建議作者重新思考研究方向，以及人生方向。',
+    '作者的參考文獻中，沒有引用任何 1987 年以前的經典。（指的是他自己的論文）',
+    '我認為這篇論文更適合投到別的期刊。（他推薦的是他自己當編輯的期刊）',
+    '作者聲稱「首次」提出此方法，但我記得我阿公在 1970 年就做過了。',
+    '整體而言，這是一篇很好的論文。Reject。'
+  ],
+  r2meh:['好吧，我勉強同意。但我還是覺得 Figure 3 很醜。','作者回答了我所有問題，但我還是不太開心。','Weak accept。我保留抱怨的權利。','我被說服了。這是我第一次被說服，請珍惜。'],
+  r3:['我同意 Reviewer 2。','（Reviewer 3 沒有交審查意見）','Weak accept，但我其實沒有讀。','我是 Reviewer 2 的學生，我同意老師。','Looks good to me. 👍','我的意見跟 Reviewer 1 相同，請參照 Reviewer 1。','本人與作者有利益衝突（我們在同一個籃球隊），但我還是覺得不錯。','我審到一半睡著了，醒來就按了送出。','我用 ChatGPT 讀了這篇論文，ChatGPT 說還可以。']
+};
+function reviews(ok){
+  const rows = ok
+    ? [['Reviewer 1',pick(RV.r1good)],['Reviewer 2',pick(RV.r2meh),'r2'],['Reviewer 3',pick(RV.r3)]]
+    : [['Reviewer 1',pick(RV.r1good)],['Reviewer 2',pick(RV.r2bad),'r2'],['Reviewer 3',pick(RV.r3)]];
+  return rows.map(r=>`<div class="rv ${r[2]||''}"><b>${r[0]}</b>${r[1]}</div>`).join('');
+}
 const ACTIONS = [
   {id:'write',t:'寫論文',ic:'paper',f:'打開 Word，盯著游標閃兩小時。',h:['進度↑','精神↓'],st:'MPD',w:4,
     run:()=>note('寫了三頁，刪了兩頁', pick(['至少檔名從 final.docx 變成 final_v2.docx 了。','你發現最難寫的是 Abstract，第二難的是其他全部。','寫到一半，Word 當掉了。幸好有自動儲存……的上一版。']), gain({prog:rnd(12,18),san:-4}),'paper')},
@@ -946,8 +997,8 @@ const ACTIONS = [
     run:async()=>{
       const dc=12+S.school.dc+(S.stage==='phd'?1:S.stage==='pd'?2:0);
       const r=await roll('skill',dc,`${F().sub}：${F().venue}`,[['教授加持',S.prof.paper],['AI 潤稿',has('ai')?2:0]]);
-      if(r.ok) return note('Accept！', pick(['你把錄取信截圖傳到家族群組，阿嬤問你什麼時候畢業。','Minor revision 之後就收了！教授在群組發了一個讚。','三位 reviewer 都說好。你懷疑系統是不是寄錯人了。']), gain({papers:1,prog:10,san:6,favor:8}),'paper');
-      return note('Reviewer 2 出現了', pick(['「作者顯然沒有讀過 [Reviewer2 et al., 2019]。」','「這個方法很有趣，但我不喜歡。Reject。」','「建議補做 15 組實驗，期限兩週。」','「英文需要請母語人士潤飾。」（審稿意見本身有三個文法錯誤）']), gain({san:ouch(-11)}),'devil');
+      if(r.ok) return note('Accept！', reviews(true)+`<p>${pick(['你把錄取信截圖傳到家族群組，阿嬤問你什麼時候畢業。','教授在群組發了一個讚，這是他今年第一個讚。','你懷疑系統是不是寄錯人了，重新整理了 30 次。','你在研究室大叫，隔壁實驗室以為發生火災。'])}</p>`, gain({papers:1,prog:10,san:6,favor:8}),'paper');
+      return note(pick(['Reject','Major revision（其實是 Reject）','Reviewer 2 出現了']), reviews(false), gain({san:ouch(-11)}),'devil');
     }},
   {id:'conf',t:'參加研討會',ic:'mic',f:'茶點好吃，海報很多，大神就在那裡。',h:['腦力↑','存款↓'],dice:'嘴砲',st:'MPD',w:2,
     run:async()=>{
@@ -1060,9 +1111,13 @@ const EVENTS = [
   {id:'love',ic:'cat',t:'實驗室外面的世界',x:'有人約你週末去看電影。你上次看電影是大學的時候。',o:[
     ['去約會',()=>note('原來外面有陽光','你發現世界上還有不談 baseline 的對話。',gain({san:12,prog:-5}))],
     ['「我要做實驗」',()=>note('做實驗','實驗也沒有成功。',gain({san:-3,favor:2}))]]},
-  {id:'rev2',ic:'devil',t:'Reviewer 2 回來了',x:'「感謝作者的回覆。但我還是建議補做 10 組實驗。」',c:()=>S.papers>0||S.prog>30,o:[
-    ['乖乖補',()=>note('補完了','十組實驗，三週，兩箱泡麵。',gain({prog:-6,san:-6,skill:1}))],
-    ['據理力爭',async()=>{const r=await roll('talk',14,'撰寫 rebuttal');return r.ok?note('Reviewer 被說服了','「作者的回覆說服了我。」這是你第一次在現實中看到這句話。',gain({san:5,skill:1})):note('火上加油','Reviewer 2 追加了五組實驗。',gain({san:ouch(-10)}));}]]},
+  {id:'rev2',ic:'devil',t:'Reviewer 2 回來了',x:()=>`第二輪審查意見：「${pick(RV.r2bad)}」`,c:()=>S.papers>0||S.prog>30,o:[
+    ['乖乖補',()=>note('補完了',pick(['十組實驗，三週，兩箱泡麵。','你補了 15 頁 supplementary，比正文還長。','補完之後，Reviewer 2 說：「其實不用補。」']),gain({prog:-6,san:-6,skill:1}))],
+    ['據理力爭',async()=>{const r=await roll('talk',14,'撰寫 rebuttal');return r.ok?note('Reviewer 被說服了',`「${pick(RV.r2meh)}」`,gain({san:5,skill:1})):note('火上加油',pick(['Reviewer 2 追加了五組實驗，還指出你的 rebuttal 有錯字。','Reviewer 2 回了一句：「作者態度不佳。」','Reviewer 2 把審查意見從 2 頁擴充到 9 頁。']),gain({san:ouch(-10)}));}],
+    ['寫信給編輯告狀',async()=>{const r=await roll('luck',15,'等編輯回信');return r.ok?note('編輯站在你這邊','編輯：「我也受不了這位審查委員很久了。」換了新的 reviewer。',gain({san:8})):note('編輯回信了','「謝謝您的來信。另外，Reviewer 2 是我的指導教授。」',gain({san:ouch(-12)}));}]]},
+  {id:'r2meet',ic:'devil',t:'研討會上的 Reviewer 2',x:'你在研討會茶點區發現一個人，名牌上寫著他的名字。從他批評蛋糕的語氣，你確定他就是 Reviewer 2。',o:[
+    ['上前搭話',async()=>{const r=await roll('talk',13,'跟 Reviewer 2 聊天');return r.ok?note('他其實人還不錯','聊完之後他說：「你的研究很有趣，誰審的那麼兇？」',gain({san:8,skill:1})):note('他開始現場審你','他從你的名牌字體開始批評，一路講到你的人生規劃。',gain({san:-8}));}],
+    ['偷偷把他的蛋糕拿走',()=>note('小小的復仇','你吃掉了他的提拉米蘇。這是你研究所生涯最甜的時刻。',gain({san:10}))]]},
   {id:'boba',ic:'boba',t:'學弟請喝飲料',x:'學弟拿著一杯半糖少冰的珍奶：「學長姐辛苦了。」',o:[
     ['感動收下',()=>note('人間溫暖','你喝完後多活了一個禮拜。',gain({san:7}))]]},
   // Absurd lab life
@@ -1130,6 +1185,80 @@ const EVENTS = [
   {id:'group',ic:'phone',t:'實驗室群組改名了',x:'實驗室 Line 群組被教授改名為「XX Lab 24hr 不打烊 💪」。',o:[
     ['按讚',()=>note('沒得選','群組裡的每個人都按了讚，每個人都在心裡流淚。',gain({san:-4,favor:2}))],
     ['把群組設成靜音',()=>note('世界清靜了','直到你錯過了明天 7 點的 meeting。',gain({san:5,favor:-5}))]]},
+  // Lab ghost stories (shown on a night page)
+  {id:'g-keys',g:1,ic:'ghost',t:'凌晨三點的鍵盤聲',x:'研究室只剩你一個人。隔壁空位突然傳來打字聲，那台電腦的螢幕自己亮了，正在寫你的 related work，而且寫得比你好。',o:[
+    ['小聲說「謝謝學長」',()=>note('鍵盤聲停了','螢幕上多了一行字：「記得引用我。」你的進度莫名多了一大截。',gain({prog:14,san:-5}))],
+    ['關掉電腦逃跑',()=>note('你跑到樓下','回頭一看，研究室的燈全亮了，裡面傳出 Word 存檔的音效。',gain({san:-7}))]]},
+  {id:'g-lift',g:1,ic:'ghost',t:'八樓的電梯',x:'你按了 3 樓，電梯卻每次都停在 8 樓。門打開沒有人，只有一陣風吹進來，還有一張寫著「進度呢？」的便利貼。',o:[
+    ['走樓梯下去',()=>note('腿好痠','你走了 8 層樓，到樓下時發現便利貼黏在你背上。',gain({stamina:1,san:-4}))],
+    ['對著空氣報告進度',async()=>{const r=await roll('talk',12,'對空氣報告');return r.ok?note('風停了','電梯門關上，順利把你送回 3 樓。你感覺被某種存在認可了。',gain({san:4,favor:3})):note('風更大了','你的 slides 從手中飛出去，散落在 8 樓走廊。',gain({san:-8,prog:-5}));}]]},
+  {id:'g-pid',g:1,ic:'ghost',t:'永遠跑不完的程式',x:'伺服器上有一個 process 從 2009 年跑到現在，使用者名稱是「學長」。沒有人知道學長是誰。',o:[
+    ['kill 掉它',()=>note('所有螢幕同時亮起','每台電腦都顯示一行字：「還沒跑完。」它又自己重新開始了。',gain({san:-9}))],
+    ['不要動它',()=>note('明智的選擇','大家都說，只要它還在跑，實驗室就會平安。你的實驗也順利跑完了。',gain({prog:8,san:2}))]]},
+  {id:'g-sample',g:1,ic:'fridge',t:'冷凍庫最深處',x:'-80°C 冷凍庫的最深處有一個盒子，標籤寫著：「1998．千萬別解凍」。',o:[
+    ['解凍看看',()=>{const v=rnd(1,3);
+      if(v===1) return note('打開了……','是教授碩士班時冰的珍奶。他說那是「實驗室的根」。',gain({san:5,favor:-3}));
+      if(v===2) return note('打開了……','實驗室的溫度突然降了十度，你的螢幕上出現一行字：「放回去。」',gain({san:-10}));
+      return note('打開了……','是一份手寫的資格考考古題，筆跡很像你的教授。',gain({skill:2,san:-3}));}],
+    ['默默關上',()=>note('有些事不要知道比較好','你在門上多貼了一張「真的千萬別解凍」。',gain({san:1}))]]},
+  {id:'g-print',g:1,ic:'printer',t:'半夜的印表機',x:'凌晨兩點，印表機自己啟動，印出一份論文。作者是你，日期是 2031 年，標題是你的研究題目。',o:[
+    ['偷看結論',()=>note('劇透了','原來你的方法最後是用在烤吐司上的。不過你知道下一步該怎麼做了。',gain({prog:12,skill:1}))],
+    ['把它燒掉',()=>note('時間線被你改寫了','第二天，印表機又印了一份，這次日期是 2035 年。',gain({san:-6}))]]},
+  {id:'g-cup',g:1,ic:'coffee',t:'學長的杯子',x:'實驗室名冊上有一位「阿明學長」。大家都說他 2015 年就畢業了，但他桌上的咖啡每天早上都是溫的。',o:[
+    ['幫他洗杯子',()=>note('第二天','杯子旁邊多了一張紙條：「謝謝。你的 bug 在第 87 行。」真的在第 87 行。',gain({prog:10,san:-2}))],
+    ['喝一口',()=>note('是美式，不加糖','你精神變好了，但接下來三天一直夢到自己在寫 2015 年的論文。',gain({san:6,prog:-4}))]]},
+  {id:'g-seat',g:1,ic:'chair',t:'最裡面的位子',x:'研究室最裡面靠牆的位子永遠空著。傳說坐那個位子的人，每一屆都延畢。',o:[
+    ['不信邪，坐下去',async()=>{const r=await roll('luck',12,'挑戰傳說');return r.ok?note('什麼事都沒發生','你打破了傳說，成為實驗室的英雄。學弟妹開始叫你「破咒者」。',gain({san:8,talk:1})):note('椅子自己轉了一圈','你的螢幕跳出系統通知：「建議您申請延長修業年限。」',gain({san:-10}));}],
+    ['繞過它',()=>note('尊重傳統','你在位子上放了一杯珍奶當供品，順便祈求畢業。',gain({money:-1,san:3}))]]},
+  {id:'g-mirror',g:1,ic:'ghost',t:'廁所的鏡子',x:'深夜去系館廁所洗手，你發現鏡子裡的自己頭髮比較多，黑眼圈比較淡，而且正在對你搖頭。',o:[
+    ['問鏡子：「我什麼時候畢業？」',()=>note('鏡子裡的你笑了','它舉起手指比了一個數字，然後燈就熄了。你沒看清楚是幾。',gain({san:-5}))],
+    ['趕快回去睡覺',()=>note('今晚就到這裡','你難得在十二點前睡覺，隔天醒來頭髮好像真的多了一根。',gain({san:8,prog:-3}))]]},
+  {id:'g-ghostmonth',g:1,ic:'ghost',t:'農曆七月',x:'鬼月到了。教授在群組說：「這個月不要投稿、不要口試、不要搬實驗室。」',o:[
+    ['照投不誤',async()=>{const r=await roll('luck',14,'鬼月投稿');return r.ok?note('好兄弟幫你一把','Reviewer 2 這個月請假，論文直接收了。',gain({papers:1,san:4})):note('果然不該投','審查意見的 PDF 打開後是一片空白，只有一行小字：「七月不審」。',gain({san:-8}));}],
+    ['聽教授的，休息一個月',()=>note('鬼月最棒的福利','你終於有了合法休息的理由。',gain({san:14,prog:-5}))]]},
+  {id:'g-meet',g:1,ic:'phone',t:'03:00 的會議邀請',x:'Google 行事曆收到一封會議邀請，時間是凌晨三點，寄件人是一位十年前就退休的老教授，主旨：「談談你的研究」。',o:[
+    ['接受邀請',()=>note('凌晨三點的視訊','畫面一片黑，只有聲音說：「你的方法……不錯……」然後斷線。你的信心莫名增加了。',gain({skill:1,talk:1,san:-6}))],
+    ['婉拒',()=>note('已婉拒','行事曆自動回覆：「沒關係，我明年再約。」',gain({san:-3}))]]},
+  {id:'g-coat',g:1,ic:'ghost',fd:'bio',t:'走廊上的白衣人',x:'半夜你看到一個穿白衣的人，在走廊上緩緩飄過，手上還拿著一盤東西。',o:[
+    ['跟上去',()=>note('真相大白','是隔壁實驗室的學姐，穿著實驗衣，已經 40 小時沒睡，正在把細胞送去培養箱。你們一起吃了泡麵。',gain({san:6}))],
+    ['躲進動物房',()=>note('老鼠們看著你','你在動物房待到天亮，跟老鼠培養出了革命情感。',gain({san:-4,prog:4}))]]},
+  {id:'g-gpu',g:1,ic:'gpu',fd:'cs',t:'沒有人在用的 GPU',x:'半夜實驗室沒人，nvidia-smi 卻顯示 8 張卡使用率 100%，跑的是你上個月刪掉的那份 code，而且 loss 比你現在的低。',o:[
+    ['偷偷把結果存起來',()=>note('論文進度 +1','你不知道這算不算學術倫理問題，但結果真的很好。',gain({prog:15,san:-4}))],
+    ['拔掉電源',()=>note('螢幕還亮著','拔掉電源後，螢幕上的 loss 繼續往下降了一會兒，才慢慢消失。',gain({san:-9}))]]},
+  // More absurd lab life
+  {id:'eggtart',ic:'boba',t:'限量蛋塔',x:'教授：「聽說市區新開了一家蛋塔店，每天限量 100 顆，你明天早上幫我去排一下。」店九點開，排隊從五點開始。',o:[
+    ['清晨四點出發',()=>note('第 97 號','你買到了。教授吃了一口說：「普通。」',gain({favor:8,san:-7}))],
+    ['買全聯的代替',async()=>{const r=await roll('talk',13,'假裝是名店蛋塔');return r.ok?note('教授吃不出來','「果然名不虛傳！」',gain({favor:6})):note('被識破了','「這個包裝上寫『全聯』。」',gain({favor:-8}));}]]},
+  {id:'tiktok',ic:'video',t:'抖音風簡報',x:'教授：「現在年輕人都看短影音，下次研討會的 slides 做成抖音風。」',o:[
+    ['加入特效和罐頭笑聲',async()=>{const r=await roll('talk',13,'在研討會上放抖音');return r.ok?note('全場瘋狂','你的報告在 Threads 爆紅，有人說這是「學術界的新浪潮」。',gain({favor:8,san:5})):note('大會主席把你的麥克風關掉了','你的報告被剪成迷因，標題是「研究生的崩潰」。',gain({san:-8}));}],
+    ['默默做成正常的',()=>note('教授：「你是不是不想紅？」','',gain({favor:-4}))]]},
+  {id:'promo',ic:'video',t:'招生宣傳片',x:'系上要拍招生影片，你被選為「快樂研究生」代表，要對著鏡頭說：「讀研究所是我人生最棒的決定！」',o:[
+    ['用盡畢生演技',async()=>{const r=await roll('talk',12,'假笑');return r.ok?note('影片上線了','點閱率破萬，留言區有人說：「他的眼神在求救。」',gain({favor:6,san:-3})):note('NG 47 次','導演最後說：「算了，用背影就好。」',gain({san:-7}));}],
+    ['說出真心話',()=>note('影片沒有上線','但你的 NG 片段在研究生之間私下流傳，成為傳奇。',gain({san:8,favor:-6}))]]},
+  {id:'fblike',ic:'phone',t:'教授的臉書',x:'教授：「我最近在經營個人品牌，你們記得每篇都要按讚，留言『老師好棒』。」教授一天發 9 篇。',o:[
+    ['設定自動按讚機器人',async()=>{const r=await roll('skill',12,'寫按讚腳本');return r.ok?note('自動化的勝利','教授稱讚你「是最有參與感的學生」。',gain({favor:8,skill:1})):note('機器人失控了','它在教授的每篇貼文下留言「老師好棒」三百次，還按了教授前女友的貼文讚。',gain({favor:-10}));}],
+    ['手動按讚',()=>note('每天 9 次','你的大拇指比你的論文還有進展。',gain({favor:4,san:-4}))]]},
+  {id:'trash',ic:'fridge',t:'倒垃圾抽籤',x:'實驗室抽籤決定誰負責倒垃圾。你已經連續抽中五次了。',o:[
+    ['要求檢查籤筒',()=>note('真相大白','籤筒裡的每一張籤都寫著你的名字。是學長做的。',gain({san:-4,talk:1}))],
+    ['認命去倒',()=>note('垃圾車音樂響起','你跟著《少女的祈禱》奔跑，像是一部文藝電影的主角。',gain({san:-2,stamina:1}))]]},
+  {id:'ktv',ic:'mic',t:'腦力激盪會議',x:'教授說要辦「腦力激盪會議」，結果把全實驗室帶去 KTV。他唱了兩小時的《愛拼才會贏》。',o:[
+    ['合唱',()=>note('師生同心','教授拍著你的肩膀說：「你很有團隊精神。」',gain({favor:8,san:2}))],
+    ['點一首《好想畢業》',()=>note('包廂安靜了','教授看了你一眼，然後把麥克風搶回去，繼續唱《愛拼才會贏》。',gain({favor:-4,san:5}))]]},
+  {id:'cabbage',ic:'money',t:'媽媽的包裹',x:'警衛打電話來：「你媽媽寄了一箱東西到系館，很重。」打開是 12 顆高麗菜。',o:[
+    ['分給全實驗室',()=>note('高麗菜外交','教授拿走 3 顆，說他太太很開心。隔壁實驗室還用試劑跟你換了 2 顆。',gain({favor:6,san:4}))],
+    ['自己吃一個月',()=>note('高麗菜人生','你學會了 17 種高麗菜料理，存款也變多了。',gain({money:2,san:-2}))]]},
+  {id:'aidetect',ic:'paper',t:'AI 偵測器',x:'學校新導入的 AI 偵測器，判定你的論文「98% 由 AI 生成」。這是你熬夜三個月一個字一個字打的。',o:[
+    ['申訴',async()=>{const r=await roll('talk',13,'證明自己是人類');return r.ok?note('申訴成功','委員會認定你是人類。你從來沒想過需要證明這件事。',gain({san:2})):note('申訴失敗','委員會說：「你的寫作風格太像 AI 了，請寫得爛一點。」',gain({san:-8,prog:-5}));}],
+    ['故意加幾個錯字',()=>note('AI 機率降到 3%','你的論文現在有一種「人類的溫度」。教授說錯字太多。',gain({favor:-3}))]]},
+  {id:'tour',ic:'cap',t:'系館導覽志工',x:'系上要求研究生輪流當高中生參訪團的導覽志工。高中生問你：「研究所是不是很好玩？」',o:[
+    ['說「超好玩！」',()=>note('善意的謊言','高中生眼睛發亮。你在心裡默默跟他們說了聲抱歉。',gain({favor:3,san:-3}))],
+    ['帶他們參觀凌晨的研究室',()=>note('最真實的導覽','三個高中生決定改念醫學系。系主任要你寫檢討報告。',gain({san:5,favor:-5}))]]},
+  {id:'hackathon',ic:'server',t:'週末 Hackathon',x:'教授：「這週末我們辦一個 Hackathon，有披薩！」主題是：幫他的計畫寫結案報告。',o:[
+    ['吃披薩，寫報告',()=>note('48 小時後','報告寫完了。披薩是夏威夷口味的，而且只有一盒。',gain({favor:7,san:-8,money:1}))],
+    ['說你過敏',async()=>{const r=await roll('talk',12,'對披薩過敏');return r.ok?note('教授相信了','你週末去看了海。',gain({san:8})):note('教授：「你上週才吃了兩盒。」','',gain({favor:-6}));}]]},
+  {id:'fortune',ic:'charm',t:'學位廟',x:'學長說台南有一間「學位廟」，拜完之後口試都會過。廟的香油錢可以刷信用卡。',o:[
+    ['去拜拜',()=>note('求到一支籤','籤詩上寫：「Reviewer 二號，退散。」你覺得很有道理。',gain({money:-1,luck:1,san:4}))],
+    ['我相信科學',()=>note('科學的信徒','當晚你夢到牛頓對你搖頭。',gain({skill:1}))]]},
   // CS
   {id:'google',ic:'gpu',fd:'cs',t:'被大公司先發了',x:'Google 剛發表了跟你一樣的方法，用了 4096 張 TPU。',o:[
     ['轉題目',()=>note('重新開始','你從頭讀起，但這次讀得比較快。',gain({prog:-12,skill:1}))],
@@ -1242,7 +1371,7 @@ async function randomEvent(){
   const tot=pool.reduce((s,e)=>s+(e.rare?.6:e.pf?3:2),0); let x=Math.random()*tot;
   const ev=pool.find(e=>(x-=(e.rare?.6:e.pf?3:2))<0)||pool[0];
   S.seen[ev.id]=1;
-  const i=await modal(`<p class="muted">突發事件</p><h2>${ev.t}</h2><p>${val(ev.x)}</p>`, ev.o.map(o=>o[0]), ev.o.length>1, ev.ic);
+  const i=await modal(`<p class="muted">${ev.g?'深夜怪談':'突發事件'}</p><h2>${ev.t}</h2><p>${val(ev.x)}</p>`, ev.o.map(o=>o[0]), ev.o.length>1, ev.ic, ev.g?'night':'');
   await ev.o[i][1]();
   checkFail();
 }
@@ -1258,45 +1387,124 @@ async function semesterEnd(){
 
 /* ================= bosses ================= */
 const QS = {
-  all:['這跟 ChatGPT 有什麼不一樣？','所以這個研究有什麼用？','我沒看懂第三章，你可以再講一次嗎？','請問你的 novelty 在哪裡？','這個問題我十年前就做過了，你知道嗎？','你的 Figure 5 字太小了，我看不到。','如果資料多十倍，結果會怎麼樣？','你的結論好像跟你的標題沒有關係？'],
-  cs:['你的 baseline 為什麼不跟今年的方法比？','這個 0.3% 的提升，有做顯著性檢定嗎？','你有試過把模型再加大嗎？'],
-  bio:['n = 3 你覺得夠嗎？','這個 p-value 是怎麼算出來的？','你的 control 組在哪裡？']
+  all:['這跟 ChatGPT 有什麼不一樣？','所以這個研究有什麼用？','我沒看懂第三章，你可以再講一次嗎？','請問你的 novelty 在哪裡？','這個問題我十年前就做過了，你知道嗎？','你的 Figure 5 字太小了，我看不到。','如果資料多十倍，結果會怎麼樣？','你的結論好像跟你的標題沒有關係？','你可以用一句話跟我阿嬤解釋你的研究嗎？','如果明天世界末日，你的研究還有意義嗎？','你的封面為什麼是 Comic Sans？','你覺得你配得上這個學位嗎？'],
+  cs:['你的 baseline 為什麼不跟今年的方法比？','這個 0.3% 的提升，有做顯著性檢定嗎？','你有試過把模型再加大嗎？','你的 random seed 是多少？為什麼是 42？','這個問題，GPT 可以直接回答嗎？'],
+  bio:['n = 3 你覺得夠嗎？','這個 p-value 是怎麼算出來的？','你的 control 組在哪裡？','這隻老鼠叫什麼名字？','Western 的這條帶，是你用小畫家畫的嗎？']
 };
-function committeeSVG(mood=0){
-  const face=(x,glasses,hair,m)=>`<circle class="line" cx="${x}" cy="62" r="26" style="fill:#fff6ea"/>
-    ${glasses?`<circle class="line" cx="${x-9}" cy="60" r="6"/><circle class="line" cx="${x+9}" cy="60" r="6"/><path class="line" d="M${x-3} 60h6"/>`:`<circle cx="${x-9}" cy="60" r="3" fill="#1f2d4a"/><circle cx="${x+9}" cy="60" r="3" fill="#1f2d4a"/>`}
-    ${hair?`<path class="line" d="M${x-24} 52q4-20 24-20q20 0 24 20"/>`:`<path class="line" d="M${x-12} 38q12-6 24 0"/>`}
-    <path class="line" d="${m>0?`M${x-8} 74q8 7 16 0`:m<0?`M${x-8} 78q8-7 16 0`:`M${x-8} 76h16`}"/>
-    <path class="line" style="fill:#c7cfdd" d="M${x-30} 130q2-38 30-40q28 2 30 40z"/>`;
-  return `<svg class="committee" viewBox="0 0 420 150" style="filter:url(#rough)">
-    ${face(80,true,false,mood)}${face(210,false,true,mood)}${face(340,true,true,mood)}
+const COMMITTEE = [
+  {id:'sleep',name:'睡著的口委',g:false,h:false,intro:'從你的第二張投影片開始閉目養神。',
+    q:['（突然驚醒）……所以你的結論是什麼？','剛剛那頁再放一次，我剛剛……在思考。','（揉眼睛）你現在講到第幾章了？'],
+    ok:['（點點頭，然後繼續睡）','「嗯……很好……」（打呼）','他在夢中簽了名。'],
+    bad:['打呼聲變大了，像是在表達不滿。','他醒過來說：「不行。」然後又睡回去。','他在睡夢中搖頭。']},
+  {id:'self',name:'只講自己研究的口委',g:true,h:false,intro:'所有問題都會繞回他 1999 年的論文。',
+    q:['這讓我想到我 1999 年的研究，你知道嗎？','你有沒有考慮用我的方法？就是我那個很有名的方法。','你的 reference 裡面為什麼沒有我？'],
+    ok:['「很好。記得在致謝裡寫我。」','「你很有眼光，跟我年輕時一樣。」','他開始講他自己的研究，講了 15 分鐘，順便讓你過了。'],
+    bad:['「你連我的論文都沒引用，還敢來口試？」','「我的方法比你好十倍，你要不要重做？」','他拿出自己的論文，在你面前念了一段。']},
+  {id:'name',name:'叫錯你名字的口委',g:false,h:true,intro:'一直覺得你是另一個學生。',
+    q:['王同學……喔不是，李同學？你的……這是誰的論文？','陳同學，你上次說的那個實驗做完了嗎？（你不姓陳）','我記得你去年已經口試過了？'],
+    ok:['「很好，林同學！」（你不姓林）','「不錯不錯，你叫什麼名字來著？」','他在單子上簽了名，寫的是別人的名字。'],
+    bad:['「張同學，我很失望。」（你也不姓張）','「這跟你去年講的不一樣啊。」（你去年沒來）','他轉頭問教授：「這是你的學生嗎？」']},
+  {id:'sowhat',name:'「所以呢」口委',g:true,h:true,intro:'只會說三個字。',
+    q:['所以呢？','然後呢？','所以這有什麼意義？'],
+    ok:['「……好吧。」','他沉默了很久，最後說：「可以。」','「所以……過了。」'],
+    bad:['「所以呢？」','「所以呢？？」','「所以呢？？？」（他每說一次，你就老一歲）']},
+  {id:'red',name:'拿紅筆的口委',g:true,h:false,intro:'你的論文被他改到沒有一頁是白的。',
+    q:['第 12 頁第 3 行，「的」跟「得」用錯了，你怎麼解釋？','你的參考文獻格式有七種，你是在辦展覽嗎？','你的圖表編號從 3 直接跳到 7，4 到 6 去哪了？'],
+    ok:['他在你的論文上畫了一個小小的勾。這是他今年畫的第一個勾。','「嗯，這頁只有 17 個錯字，算你過。」','他收起紅筆，換了一支藍筆。這是好兆頭。'],
+    bad:['他又拿出一支紅筆，因為第一支寫完了。','「你的論文我改了 342 個地方，這是第一部分。」','他把整本論文塗成紅色，像一本紅寶書。']},
+  {id:'big',name:'校外大老',g:true,h:true,intro:'審過一萬篇論文，自稱這個領域是他開創的。',
+    q:['你知道這個領域是誰開創的嗎？是我。','我在國外審過一萬篇論文，你覺得你這篇排第幾？','你這個題目，我的博士生十年前就做過了。'],
+    ok:['「嗯，年輕人有潛力。」（他沒有在看你）','「不錯，有我年輕時候 30% 的水準。」','他對你的指導教授點了點頭，教授鬆了一口氣。'],
+    bad:['「這是我看過第二爛的論文。」你很想知道第一爛的是誰。','「你們台灣現在都教這樣嗎？」','他把你的論文推到桌子的最邊邊。']},
+  {id:'gentle',name:'和藹但致命的口委',g:false,h:true,intro:'笑咪咪地說：「我只有一個小問題。」',
+    q:['我只有一個小問題：你整個研究的前提是不是錯的？','不好意思，再一個小問題：你的資料是真的嗎？','最後一個小問題（第 14 個）：你為什麼要讀研究所？'],
+    ok:['「呵呵，很好很好。」他的笑容讓你背脊發涼，但是過了。','「謝謝你的回答，我很滿意。」（你不確定他是不是認真的）','他溫柔地點頭，像在看一隻努力的小狗。'],
+    bad:['「呵呵，這樣啊。」他在紙上寫了一個大大的 F。','他笑咪咪地說：「那我們明年再見囉。」','「沒關係，每個人都會犯錯。只是你犯得比較多。」']},
+  {id:'hot',name:'熱血拍桌口委',g:false,h:false,intro:'情緒激動時會站起來。',
+    q:['你說！你的研究到底對人類有什麼貢獻！','你看著我的眼睛，告訴我你的 novelty 在哪裡！','如果你是 Reviewer 2，你會接受自己的論文嗎！'],
+    ok:['他用力拍你的肩膀：「好！這才是研究生！」','他眼眶泛淚：「我好久沒看到這麼有熱情的學生了。」','他站起來鼓掌，其他兩位口委也被迫跟著鼓掌。'],
+    bad:['他用力拍桌，水杯飛到你臉上。','「不對！不對！不對！」他每說一次就拍一次桌子。','他激動到把椅子踢倒，然後自己去扶起來。']}
+];
+const SLAPS = [
+  '口委站起來，用你的論文賞了你一巴掌。整間教室安靜了三秒。',
+  '口委把你的論文捲成一筒，在你頭上敲了三下：「醒、醒、醒。」',
+  '口委的雷射筆直接射進你的眼睛：「這就是你的盲點。」',
+  '口委用力拍桌，桌上的便當跳起來，滷蛋滾到你腳邊。',
+  '口委把你的論文從窗戶丟出去（還好是一樓）。',
+  '口委脫下拖鞋，用它指著你的 Figure 5。',
+  '口委把你的論文撕成兩半：「這樣比較好讀。」',
+  '口委轉頭問你的指導教授：「你平常都教他什麼？」教授開始狂冒汗。',
+  '口委用白板筆在你的投影幕上畫了一個大叉叉。投影幕是學校的。',
+  '口委拿起你的論文聞了一下：「有抄襲的味道。」'
+];
+const DODGE = ['這是一個很好的問題……','這部分我們列為未來工作。','謝謝老師的問題，我也很想知道。','我們換個角度來看這個問題。'];
+function committeeSVG(cm, speaker, moods){
+  const xs=[80,210,340];
+  const face=(i)=>{
+    const x=xs[i], c=cm[i], m=moods[i], on=i===speaker;
+    const eyes = c.id==='sleep' && m<=0 ? `<path class="line" d="M${x-14} 60h8M${x+6} 60h8"/><text x="${x+22}" y="40" style="font:700 14px var(--num);fill:#1f2d4a">z</text>`
+      : c.g ? `<circle class="line" cx="${x-9}" cy="60" r="6"/><circle class="line" cx="${x+9}" cy="60" r="6"/><path class="line" d="M${x-3} 60h6"/>`
+      : `<circle cx="${x-9}" cy="60" r="3" fill="#1f2d4a"/><circle cx="${x+9}" cy="60" r="3" fill="#1f2d4a"/>`;
+    const brows = m<0 ? `<path class="line" style="stroke-width:2.4" d="M${x-16} 48l10 4M${x+16} 48l-10 4"/>` : '';
+    return `<g ${on?'':'opacity=".55"'}>
+      <circle class="line" cx="${x}" cy="62" r="26" style="fill:${on?'#fff0a0':'#fff6ea'}"/>${eyes}${brows}
+      ${c.h?`<path class="line" d="M${x-24} 52q4-20 24-20q20 0 24 20"/>`:`<path class="line" d="M${x-12} 38q12-6 24 0"/>`}
+      ${c.id==='red'?`<path class="line" style="stroke:#d3423a" d="M${x+28} 96l14-26"/>`:''}
+      <path class="line" d="${m>0?`M${x-8} 74q8 7 16 0`:m<0?`M${x-8} 78q8-7 16 0`:`M${x-8} 76h16`}"/>
+      <path class="line" style="fill:#c7cfdd" d="M${x-30} 130q2-38 30-40q28 2 30 40z"/></g>`;
+  };
+  return `<svg class="committee" viewBox="0 0 420 166" style="filter:url(#rough)">
+    ${face(0)}${face(1)}${face(2)}
     <path class="line" style="fill:#d2b48c" d="M10 118h400v26H10z"/>
-    <path class="line" d="M180 130h60" /><text x="210" y="140" text-anchor="middle" style="font:700 12px var(--hand);fill:#1f2d4a">口試委員</text></svg>`;
+    ${cm.map((c,i)=>`<text x="${xs[i]}" y="160" text-anchor="middle" style="font:700 12px var(--hand);fill:#1f2d4a">${c.name}</text>`).join('')}</svg>`;
+}
+async function slap(text){
+  const L=$('#dice');
+  L.innerHTML=`<div class="box"><div class="pow">啪！</div></div>`;
+  L.hidden=false; document.body.classList.add('quake');
+  Sound.chime(false);
+  await wait(REDUCED?200:900);
+  document.body.classList.remove('quake'); L.hidden=true;
+  return note('口委暴走了', text, gain({san:ouch(-6)}), 'prof');
 }
 async function boss(kind){
   const cfg={ms:{n:'碩士學位口試',dc:10},qual:{n:'博士資格考',dc:12},phd:{n:'博士學位口試',dc:13}}[kind];
   const dc=cfg.dc+S.school.dc;
-  await modal(`<p class="muted">BOSS</p><h2>${cfg.n}</h2><p>三位委員會輪流發問，答對兩題就過關。答題方式會決定你擲骰用哪個屬性。</p>`, ['深呼吸，上吧'], false, 'prof');
-  const qs=shuffle([...QS.all,...QS[S.field]]).slice(0,3);
-  let win=0, lose=0, mood=0;
+  const cm=shuffle(COMMITTEE).slice(0,3);
+  await modal(`<p class="muted">BOSS</p><h2>${cfg.n}</h2><p>今天的口試委員：</p>
+    <ul>${cm.map(c=>`<li><b>${c.name}</b>：${c.intro}</li>`).join('')}</ul>
+    <p class="muted">三位委員輪流發問，答對兩題就過關。答題方式決定擲骰用哪個屬性。</p>`, ['深呼吸，上吧'], false, 'prof');
+  const general=shuffle([...QS.all,...QS[S.field]]);
+  let win=0, lose=0;
+  const moods=[0,0,0];
   for(let q=0;q<3 && win<2 && lose<2;q++){
+    const c=cm[q];
+    const question = Math.random()<.6 ? pick(c.q) : general[q];
     ui(`<div class="scene-h"><h2>${cfg.n}</h2><span class="muted">第 ${q+1} 題</span></div>
-      ${committeeSVG(mood)}
-      <div class="bubble">「${qs[q]}」</div>
+      ${committeeSVG(cm,q,moods)}
+      <div class="bubble"><small class="muted">${c.name}</small><br>「${question}」</div>
       <div class="score">${'⭕'.repeat(win)}${'❌'.repeat(lose)}${'・'.repeat(3-win-lose)}</div>
       <div class="cards">
-        <button class="note" data-v="skill" style="--r:${tilt()};--c:var(--n-blue)">${icon('book')}<h3>認真回答</h3><span class="flav">用實力說話。</span><span class="tags"><span class="tag dice">🎲 腦力 ${S.st.skill}</span></span></button>
-        <button class="note" data-v="talk" style="--r:${tilt()};--c:var(--n-yellow);--d:.07s">${icon('mic')}<h3>打太極</h3><span class="flav">「這是一個很好的問題……」</span><span class="tags"><span class="tag dice">🎲 嘴砲 ${S.st.talk}</span></span></button>
-        <button class="note" data-v="favor" style="--r:${tilt()};--c:var(--n-pink);--d:.14s">${icon('prof')}<h3>轉頭看教授</h3><span class="flav">用眼神求救。</span><span class="tags"><span class="tag dice">🎲 教授好感 ${Math.floor(S.favor/10)}</span></span></button>
+        <button class="note" data-v="skill" style="--r:${tilt()};--c:var(--n-blue)">${icon('book')}<h3>認真回答</h3><span class="flav">${pick(['用實力說話。','翻開備份投影片第 87 頁。','深吸一口氣，從頭解釋。'])}</span><span class="tags"><span class="tag dice">🎲 腦力 ${S.st.skill}</span></span></button>
+        <button class="note" data-v="talk" style="--r:${tilt()};--c:var(--n-yellow);--d:.07s">${icon('mic')}<h3>打太極</h3><span class="flav">「${pick(DODGE)}」</span><span class="tags"><span class="tag dice">🎲 嘴砲 ${S.st.talk}</span></span></button>
+        <button class="note" data-v="favor" style="--r:${tilt()};--c:var(--n-pink);--d:.14s">${icon('prof')}<h3>轉頭看教授</h3><span class="flav">${pick(['用眼神求救。','用摩斯密碼眨眼。','假裝咳嗽，暗示教授出手。'])}</span><span class="tags"><span class="tag dice">🎲 教授好感 ${Math.floor(S.favor/10)}</span></span></button>
       </div>`);
     const how=await clickOnce($('#stage'),'button.note');
-    const r=await roll(how,dc,'回答口委',[['考古題',has('exam')?3:0]]);
-    const txt={skill:['口委：「嗯……合理。」','口委皺眉，在紙上畫了一個大大的問號。'],talk:['口委被你繞暈了，點點頭說：「好，下一題。」','口委：「你沒有回答我的問題。」'],favor:['教授幫你擋下來：「這部分我們之後會補。」','教授正在滑手機，沒看到你的眼神。']}[how];
-    if(r.ok){ win++; mood=1; await note('過了！',txt[0],[]); }
-    else { lose++; mood=-1; await note('糟了',txt[1],gain({san:ouch(-6)})); checkFail(); }
+    const r=await roll(how,dc,`回答${c.name}`,[['考古題',has('exam')?3:0]]);
+    if(r.ok){
+      win++; moods[q]=1;
+      const prof = how==='favor' ? `教授幫你擋下來：「${pick(['這部分我們之後會補。','這是我叫他這樣做的。','這個問題很好，我們下次合作一起研究。'])}」<br>` : '';
+      await note(r.crit?'完美回答！':'過了！', prof+pick(c.ok), r.crit?gain({san:5}):[], 'cap');
+    } else {
+      lose++; moods[q]=-1;
+      const prof = how==='favor' ? `${pick(['教授正在滑手機，沒看到你的眼神。','教授假裝在做筆記，其實在畫圈圈。','教授也轉頭，看向窗外。'])}<br>` : '';
+      await note(r.fumble?'大失敗……':'糟了', prof+pick(c.bad), gain({san:ouch(-6)}), 'prof');
+      checkFail();
+      if(r.fumble || Math.random()<.4){ await slap(pick(SLAPS)); checkFail(); }
+    }
   }
   const pass=win>=2;
-  if(pass){ await modal(`<h2>恭喜通過${cfg.n}！</h2><p>委員們在單子上簽了名。你走出口試教室時，學弟妹已經準備好蛋糕和氣球。</p>${deltaHTML(gain({skill:1,san:10,favor:5}))}`,['太好了'],false,'cap'); }
+  if(pass){ await modal(`<h2>恭喜通過${cfg.n}！</h2><p>${pick(['委員們在單子上簽了名。你走出口試教室時，學弟妹已經準備好蛋糕和氣球。','三位委員簽了名，其中一位是在睡夢中簽的。','你走出教室，發現自己的頭髮又少了幾根，但手上多了一張簽名單。'])}</p>${deltaHTML(gain({skill:1,san:10,favor:5}))}`,['太好了'],false,'cap'); }
   return pass;
 }
 
@@ -1354,7 +1562,8 @@ async function play(){
     S.sem++; S.total++;
     refresh();
     for(let step=0;step<2;step++) await playAction(step);
-    if(Math.random()<.75) await randomEvent();
+    if(Math.random()<.8) await randomEvent();
+    if(Math.random()<.25) await randomEvent();
     await semesterEnd();
     await milestones();
   }
