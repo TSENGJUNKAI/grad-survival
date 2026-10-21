@@ -41,7 +41,7 @@ body{
 *{box-sizing:border-box}
 [hidden]{display:none !important}
 button{font:inherit;color:inherit}
-#app{max-width:1120px;margin:0 auto;padding-block:16px 48px;
+#app{max-width:1120px;margin:0 auto;padding-block:16px 88px;
   padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));}
 
 /* ---------- shared doodle bits ---------- */
@@ -254,6 +254,15 @@ button.note:hover{transform:rotate(0deg) translateY(-7px) scale(1.03);box-shadow
 .cert .stamp{position:absolute;right:18px;top:18px}
 .care{margin-top:14px;font-size:.92rem;background:var(--n-green);display:inline-block;padding:6px 12px;transform:rotate(-1deg)}
 
+.snd{position:fixed;z-index:60;right:max(16px, env(safe-area-inset-right, 0px));bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+  display:flex;align-items:center;gap:6px;cursor:pointer;background:var(--n-blue);border:2.5px solid var(--ink);
+  border-radius:20px 8px 20px 8px;padding:4px 12px 4px 8px;font-size:.9rem;font-weight:700;box-shadow:2px 2px 0 var(--ink);transform:rotate(-2deg)}
+.snd .ic{width:28px;height:28px}
+.snd[aria-pressed="false"]{background:var(--paper);color:var(--pencil)}
+.snd[aria-pressed="false"] .ic{opacity:.5}
+.snd[aria-pressed="true"] .ic{animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-3px) rotate(6deg)}}
+.snd:focus-visible{outline:3px dashed var(--red);outline-offset:3px}
 @media (max-width:760px){
   #layout{grid-template-columns:minmax(0,1fr);gap:16px}
   #side{position:static;border-right:none;border-bottom:2px solid var(--margin);padding:0 0 10px;display:grid;grid-template-columns:86px minmax(0,1fr);gap:2px 12px;align-items:start}
@@ -296,6 +305,7 @@ button.note:hover{transform:rotate(0deg) translateY(-7px) scale(1.03);box-shadow
     <section id="stage" aria-live="polite"></section>
   </main>
 </div>
+<button id="snd" class="snd" aria-pressed="true" title="背景音樂"><svg class="ic" viewBox="0 0 64 64" aria-hidden="true"><path d="M24 46V14l28-6v32"/><circle cx="17" cy="46" r="7"/><circle cx="45" cy="40" r="7"/><path d="M24 22l28-6"/></svg><span>音樂</span></button>
 <div id="modal" class="layer" hidden></div>
 <div id="dice" class="layer" hidden></div>
 
@@ -320,6 +330,90 @@ let META = Object.assign({scars:0,unlocked:[],endings:[],runs:0,equip:null,tut:f
 const saveMeta = () => store.set(META_KEY, META);
 
 class EndGame { constructor(id){ this.id=id; } }
+
+/* ================= sound: a soft lo-fi loop synthesized live, plus tiny dice sfx ================= */
+const Sound = {
+  ctx:null, master:null, music:null, sfx:null, noiseBuf:null, timer:null, step:0, next:0,
+  on: store.get('gradRogue.sound', true),
+  BPM: 72,
+  CHORDS: [[53,57,60,64],[52,55,59,62],[50,53,57,60],[48,52,55,59]], // Fmaj7 Em7 Dm7 Cmaj7
+  MELODY: [69,72,74,76,79,81],
+  init(){
+    if(this.ctx) return true;
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return false;
+    const c=this.ctx=new AC();
+    this.master=c.createGain(); this.master.gain.value=0; this.master.connect(c.destination);
+    const lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=2000; lp.Q.value=.3; lp.connect(this.master);
+    const len=Math.floor(c.sampleRate*2.4), ir=c.createBuffer(2,len,c.sampleRate);
+    for(let ch=0;ch<2;ch++){ const d=ir.getChannelData(ch); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3); }
+    const verb=c.createConvolver(); verb.buffer=ir;
+    const wet=c.createGain(); wet.gain.value=.3; verb.connect(wet); wet.connect(lp);
+    this.music=c.createGain(); this.music.connect(lp); this.music.connect(verb);
+    this.sfx=c.createGain(); this.sfx.gain.value=.7; this.sfx.connect(this.master);
+    const nl=c.sampleRate; this.noiseBuf=c.createBuffer(1,nl,c.sampleRate);
+    const nd=this.noiseBuf.getChannelData(0); for(let i=0;i<nl;i++) nd[i]=Math.random()*2-1;
+    return true;
+  },
+  start(){
+    if(!this.init()) return;
+    const c=this.ctx; c.resume();
+    this.master.gain.cancelScheduledValues(c.currentTime);
+    this.master.gain.setTargetAtTime(.15,c.currentTime,.8);
+    if(!this.timer){ this.next=c.currentTime+.1; this.timer=setInterval(()=>this.schedule(),120); }
+  },
+  stop(){
+    if(!this.ctx) return;
+    this.master.gain.setTargetAtTime(0,this.ctx.currentTime,.25);
+    clearInterval(this.timer); this.timer=null;
+  },
+  set(on){
+    this.on=on; store.set('gradRogue.sound',on);
+    on?this.start():this.stop();
+    $('#snd').setAttribute('aria-pressed',String(on));
+  },
+  schedule(){
+    const c=this.ctx, e=60/this.BPM/2;
+    if(this.next < c.currentTime-.2) this.next=c.currentTime+.05;
+    while(this.next < c.currentTime+.4){ this.beat(this.step,this.next,e); this.step=(this.step+1)%32; this.next+=e; }
+  },
+  beat(s,t,e){
+    const ch=this.CHORDS[Math.floor(s/8)], b=s%8;
+    if(b===0) ch.forEach(n=>this.tone(n,t,e*8,'triangle',.028,.7,1.4));
+    if(b===0||b===5) this.tone(ch[0]-12,t,e*2.5,'sine',.11,.02,.5);
+    if(b===0||b===3) this.kick(t);
+    if(b===4) this.noise(t,.035,.09,1800);
+    if(b%2===1) this.noise(t,.012,.04,7000);
+    if(b!==0 && Math.random()<.3){
+      const n=pick(this.MELODY.filter(m=>ch.some(x=>(m-x)%12===0)||Math.random()<.4));
+      this.tone(n,t+(Math.random()<.3?e*.15:0),e*rnd(1,3),'sine',.045,.015,.6);
+    }
+  },
+  tone(midi,t,dur,type,vol,att,rel,dest){
+    const c=this.ctx, o=c.createOscillator(), g=c.createGain();
+    o.type=type; o.frequency.value=440*Math.pow(2,(midi-69)/12);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+att);
+    g.gain.setValueAtTime(vol,t+Math.max(att,dur-rel*.3)); g.gain.linearRampToValueAtTime(0,t+dur+rel);
+    o.connect(g); g.connect(dest||this.music); o.start(t); o.stop(t+dur+rel+.05);
+  },
+  kick(t){
+    const c=this.ctx, o=c.createOscillator(), g=c.createGain();
+    o.frequency.setValueAtTime(100,t); o.frequency.exponentialRampToValueAtTime(42,t+.18);
+    g.gain.setValueAtTime(.2,t); g.gain.exponentialRampToValueAtTime(.001,t+.3);
+    o.connect(g); g.connect(this.music); o.start(t); o.stop(t+.32);
+  },
+  noise(t,vol,dur,freq){
+    const c=this.ctx, src=c.createBufferSource(), f=c.createBiquadFilter(), g=c.createGain();
+    src.buffer=this.noiseBuf; f.type='bandpass'; f.frequency.value=freq; f.Q.value=.8;
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0005,t+dur);
+    src.connect(f); f.connect(g); g.connect(this.music); src.start(t); src.stop(t+dur+.02);
+  },
+  tick(){ if(this.on&&this.ctx) this.tone(rnd(84,89),this.ctx.currentTime,.02,'triangle',.05,.002,.05,this.sfx); },
+  chime(ok){
+    if(!this.on||!this.ctx) return;
+    const t=this.ctx.currentTime;
+    (ok?[72,76,79]:[67,62]).forEach((n,i)=>this.tone(n,t+i*.11,.12,'sine',.08,.01,.35,this.sfx));
+  }
+};
 
 /* ================= doodle icons (64×64, stroke only) ================= */
 const IC = {
@@ -357,7 +451,13 @@ const IC = {
   video:`<rect x="6" y="14" width="40" height="34" rx="4"/><path d="M46 26l12-7v24l-12-7zM22 24v14l11-7z"/>`,
   ruler:`<path d="M6 44L44 6l14 14l-38 38z"/><path d="M16 34l5 5M22 28l3 3M28 22l5 5M34 16l3 3M40 10l5 5"/>`,
   office:`<rect x="10" y="8" width="44" height="50"/><path d="M10 20h44M18 30h8M38 30h8M18 42h8M38 42h8M28 58V48h8v10"/><path d="M48 14l8-4" />`,
-  question:`<path d="M22 22q0-12 11-12t11 11q0 7-8 10q-4 2-4 8"/><circle cx="32" cy="50" r="2.5" fill="currentColor"/>`
+  question:`<path d="M22 22q0-12 11-12t11 11q0 7-8 10q-4 2-4 8"/><circle cx="32" cy="50" r="2.5" fill="currentColor"/>`,
+  printer:`<rect x="8" y="24" width="48" height="22" rx="3"/><path d="M18 24V8h28v16M18 40h28v18H18zM24 48h16M24 53h10"/><circle cx="49" cy="31" r="1.8" fill="currentColor"/>`,
+  bird:`<path d="M12 36q0-16 18-16q10 0 14 8l10-2l-8 7q0 17-18 17q-16 0-16-14z"/><circle cx="38" cy="28" r="1.8" fill="currentColor"/><path d="M20 38q8 6 18-2M26 50l-2 8M34 50l2 8"/>`,
+  dog:`<path d="M16 30q0-16 16-16t16 16v8q0 14-16 14T16 38z"/><path d="M16 26q-8 2-8 14q4 2 8-4M48 26q8 2 8 14q-4 2-8-4"/><circle cx="26" cy="30" r="2" fill="currentColor"/><circle cx="38" cy="30" r="2" fill="currentColor"/><path d="M29 38h6l-3 3zM32 41v3q-4 3-6 0M32 44q4 3 6 0"/>`,
+  fridge:`<rect x="16" y="4" width="32" height="56" rx="3"/><path d="M16 24h32M22 12v6M22 30v10"/><path d="M30 40q4-6 8 0q-4 6-8 0z"/>`,
+  bell:`<path d="M18 44V30a14 14 0 0 1 28 0v14l5 6H13z"/><path d="M28 54a4 4 0 0 0 8 0M32 10v6M8 22l5 3M56 22l-5 3"/>`,
+  child:`<circle cx="32" cy="18" r="10"/><path d="M28 18h1M35 18h1M29 22q3 2 6 0M18 58l4-26h20l4 26M22 40l-10-6M42 40l10-6M26 10q6-6 12 0"/>`
 };
 const icon = (k,cls='') => `<svg class="ic ${cls}" viewBox="0 0 64 64" aria-hidden="true">${IC[k]||IC.question}</svg>`;
 
@@ -370,23 +470,59 @@ const FIELDS = {
   bio:{id:'bio',name:'生命科學',icon:'rat',tag:'老鼠・細胞・週末換液',sub:'投期刊',venue:'Cell 子刊',c:'var(--n-green)'}
 };
 
+const TIERS = {
+  S:{dc:3,growth:1.3,pressure:5,job:4,stars:5},
+  A:{dc:2,growth:1.15,pressure:4,job:3,stars:4},
+  B:{dc:1,growth:1.0,pressure:3,job:2,stars:3},
+  C:{dc:0,growth:.9,pressure:2,job:1,stars:2},
+  D:{dc:-1,growth:.8,pressure:1,job:0,stars:1}
+};
 const SCHOOLS = [
-  {id:'S',name:'國立肝大',motto:'肝不好，進不來',base:12,dc:3,growth:1.3,pressure:5,job:4},
-  {id:'A',name:'清蒸交大',motto:'清晨蒸發，交出報告',base:25,dc:2,growth:1.15,pressure:4,job:3},
-  {id:'B',name:'不成功大',motto:'失敗為成功之母，我們只有母',base:42,dc:1,growth:1.0,pressure:3,job:2},
-  {id:'C',name:'中央空調大學',motto:'冷氣很強，其他隨緣',base:62,dc:0,growth:0.9,pressure:2,job:1},
-  {id:'D',name:'國立山上科大',motto:'猴子比學生多',base:100,dc:-1,growth:0.8,pressure:1,job:0}
-];
+  {id:'gan',  tier:'S',name:'國立肝大',motto:'肝不好，進不來',base:16},
+  {id:'steam',tier:'A',name:'清蒸交大',motto:'清晨蒸發，交出報告',base:28},
+  {id:'yang', tier:'A',name:'養命交大',motto:'先養命，再交報告',base:32},
+  {id:'fail', tier:'B',name:'不成功大',motto:'失敗為成功之母，我們只有母',base:45},
+  {id:'slope',tier:'B',name:'中山爬坡大學',motto:'上課要爬坡，畢業也是',base:48},
+  {id:'hype', tier:'B',name:'中興奮大學',motto:'每天都很興奮（咖啡因）',base:52},
+  {id:'ac',   tier:'C',name:'中央空調大學',motto:'冷氣很強，其他隨緣',base:64},
+  {id:'bug',  tier:'C',name:'逢甲蟲大學',motto:'夜市比圖書館大',base:68},
+  {id:'dragon',tier:'C',name:'東海龍王大學',motto:'教堂很美，論文隨緣',base:72},
+  {id:'mount',tier:'D',name:'國立山上科大',motto:'猴子比學生多',base:100}
+].map(s=>Object.assign(s,TIERS[s.tier]));
 
 const PROFS = [
-  {id:'zen', r:'SSR',name:'佛系放養型',icon:'beach',quote:'你自己決定就好，我相信你。',desc:'不給壓力，也不給方向。好感幾乎不會掉。',pressure:-1,stipend:2,prog:.9,paper:0,decay:0},
-  {id:'god', r:'SSR',name:'學術大神型',icon:'prof',quote:'這個結果，可以投 Nature。',desc:'投稿擲骰 +3，但要求很高。',pressure:4,stipend:3,prog:1.1,paper:3,decay:3},
-  {id:'wind',r:'SR', name:'八樓風很大型',icon:'wind',quote:'我辦公室在八樓，風很大，想清楚再進來。',desc:'進度飛快，精神也飛快。',pressure:4,stipend:2,prog:1.25,paper:1,decay:4},
-  {id:'kind',r:'SR', name:'慈父慈母型',icon:'cat',quote:'先把身體顧好，論文慢慢來。',desc:'每學期回復精神。',pressure:-3,stipend:2,prog:1.0,paper:0,decay:1},
-  {id:'fly', r:'R',  name:'出國開會型',icon:'plane',quote:'我現在在機場，回來再說。',desc:'一學期見三次面。',pressure:1,stipend:2,prog:1.0,paper:0,decay:2},
-  {id:'line',r:'R',  name:'凌晨三點 Line 你型',icon:'phone',quote:'（03:12）睡了嗎？明天 meeting 改 8 點。',desc:'進度變快，睡眠變少。',pressure:4,stipend:2,prog:1.15,paper:0,decay:3},
-  {id:'boss',r:'R',  name:'廉價勞工型',icon:'money',quote:'這個計畫的報帳，先幫我弄一下。',desc:'錢比較多，研究比較慢。',pressure:2,stipend:4,prog:.85,paper:0,decay:3},
-  {id:'new', r:'R',  name:'新進助理教授型',icon:'hourglass',quote:'我們一起拚 tenure！',desc:'（是他的 tenure）投稿 +1。',pressure:3,stipend:2,prog:1.1,paper:1,decay:2}
+  {id:'zen', r:'SSR',name:'佛系放養型',icon:'beach',quote:'你自己決定就好，我相信你。',desc:'不給壓力，也不給方向。好感幾乎不會掉。',pressure:-1,stipend:2,prog:.9,paper:0,decay:0,
+    ok:['很好啊，你開心就好。','我沒什麼意見，你決定。（他沒有看 slides）','嗯嗯，這個方向不錯。你上次說的是什麼方向？','你很棒，我一直都相信你。','不錯不錯，那我們下次 meeting 就……明年吧。'],
+    bad:['沒關係，慢慢來，人生很長。','嗯……你要不要問問學長？','我最近比較忙，你寄 email 給我。（他不看 email）','這個我也不太懂，你 Google 一下。','你說的我都同意，所以你剛剛說了什麼？'],
+    idle:['我下禮拜去爬玉山，有事 Line 我。','實驗室的盆栽要記得澆水喔。','你們最近還好嗎？我好像很久沒來了。','畢業？喔對，你幾年級了？','人生不只有研究，要多出去走走。','我在花蓮買了一塊地種咖啡，有空來玩。']},
+  {id:'god', r:'SSR',name:'學術大神型',icon:'prof',quote:'這個結果，可以投 Nature。',desc:'投稿擲骰 +3，但要求很高。',pressure:4,stipend:3,prog:1.1,paper:3,decay:3,
+    ok:['Good. 下週把 Nature 的 draft 給我。','這個結果我在 MIT 演講時可以用。','不錯，但還不夠 impactful。再加三個實驗。','嗯，有 Science 的潛力。','可以。你的名字我會放第五作者，很前面了。'],
+    bad:['這種東西我大學部的專題生都做得出來。','你知道我們實驗室的 h-index 是多少嗎？','我給你兩個禮拜，做不出來就換人做。','這個 idea 我 2008 年就想過了。','我年輕的時候一天睡三小時，你呢？'],
+    idle:['我下個月要去斯德哥爾摩……不是領獎，是開會。','Reviewer 2 是我以前的學生，不用怕。','我們實驗室只投 CNS，其他的不算論文。','睡覺是給沒有 deadline 的人。','我的 Google Scholar 每小時會漲 3 個引用。','我剛拒絕了一個院士的合作邀請，太忙了。']},
+  {id:'wind',r:'SR', name:'八樓風很大型',icon:'wind',quote:'我辦公室在八樓，風很大，想清楚再進來。',desc:'進度飛快，精神也飛快。',pressure:4,stipend:2,prog:1.25,paper:1,decay:4,
+    ok:['嗯，還可以。窗戶先關起來。','今天風比較小，我心情比較好。','不錯。下禮拜要有兩倍的進度。','終於有一點像樣的東西了。','好，這張圖可以留著，不用丟出窗外。'],
+    bad:['八樓風很大，你去吹一下，想清楚再回來。','你看窗外那棵樹，它都長得比你的進度快。','我開窗不是為了通風，是為了讓你的藉口飄走。','你這個結果，風一吹就散了。','我辦公室在八樓，你的進度在地下室。'],
+    idle:['我辦公室的窗戶永遠開著，歡迎隨時來吹風。','八樓視野很好，可以看到哪個實驗室的學生準時下班。','颱風天？八樓風本來就很大，meeting 照常。','冷氣？開窗就好。','電梯壞了，大家走樓梯上八樓，當作運動。','我辦公室的紙鎮有 12 個，你知道為什麼。']},
+  {id:'kind',r:'SR', name:'慈父慈母型',icon:'cat',quote:'先把身體顧好，論文慢慢來。',desc:'每學期回復精神。',pressure:-3,stipend:2,prog:1.0,paper:0,decay:1,
+    ok:['做得很好！今天早點回去休息。','我帶了蛋糕，我們邊吃邊講。','你進步好多，老師很欣慰。','這個圖畫得很漂亮，可以當封面。','太棒了，晚上全實驗室去吃熱炒！'],
+    bad:['沒關係，失敗是正常的，老師當年也失敗很多次。','你最近是不是太累了？先休息一週。','我們一起看看哪裡出問題，好嗎？','別哭別哭，老師請你喝珍奶。','實驗失敗沒關係，人沒事就好。'],
+    idle:['天氣冷了，記得多穿一件。','有沒有好好吃飯？冰箱裡有我煮的雞湯。','你家人最近好嗎？','實驗室出遊去宜蘭好不好？','我幫大家訂了一台按摩椅。','不要熬夜，熬夜寫的論文也會有黑眼圈。']},
+  {id:'fly', r:'R',  name:'出國開會型',icon:'plane',quote:'我現在在機場，回來再說。',desc:'一學期見三次面。',pressure:1,stipend:2,prog:1.0,paper:0,decay:2,
+    ok:['（在登機門）很好，繼續。','我在東京看了你的 slides，第一頁很好。','Good good，我在轉機，回來再細聊。','（視訊背景是海灘）嗯，這方向可以。','（機上 Wi-Fi）收到，讚。'],
+    bad:['（訊號斷斷續續）你……說……什麼……','我在倫敦，現在凌晨四點，你確定要講這個？','這個等我回台灣再說。（下次回台是三個月後）','我時差還沒調好，你下週再來。','（背景廣播：最後登機通知）我要走了，你自己決定。'],
+    idle:['我這學期在台灣的時間：兩週。','實驗室的鑰匙在誰那裡？我好像忘了。','幫我把伴手禮分給大家，是巴黎鐵塔鑰匙圈。','我的哩程數可以換一台車了。','你們有人知道我辦公室在幾樓嗎？','下次 meeting 在桃園機場第二航廈。']},
+  {id:'line',r:'R',  name:'凌晨三點 Line 你型',icon:'phone',quote:'（03:12）睡了嗎？明天 meeting 改 8 點。',desc:'進度變快，睡眠變少。',pressure:4,stipend:2,prog:1.15,paper:0,decay:3,
+    ok:['（02:47）很好，繼續做，我等你結果。','不錯。現在幾點？才 11 點，還早。','OK，今晚把結果傳給我，我都醒著。','（05:30）早安，結果看了，可以。','（貼圖：一隻比讚的熊）'],
+    bad:['（01:13）？','（03:12）你睡了嗎？已讀不回是什麼意思？','我傳了 47 則訊息，你一則都沒回。','（貼圖：一隻在哭的熊）','（04:00）我們需要談談。'],
+    idle:['（00:00）新年快樂，明天 meeting 照常。','（04:44）突然想到一個 idea，起來討論。','（02:02）睡不著，大家來交進度。','（03:33）傳了一篇論文給你，明天早上報告。','（01:01）這週日下午有空嗎？不用回答，你有。','（23:59）今天還沒結束，還有一分鐘。']},
+  {id:'boss',r:'R',  name:'廉價勞工型',icon:'money',quote:'這個計畫的報帳，先幫我弄一下。',desc:'錢比較多，研究比較慢。',pressure:2,stipend:4,prog:.85,paper:0,decay:3,
+    ok:['很好。順便把上個月的發票整理一下。','研究不錯，報帳更不錯。','這個可以寫進下一期計畫。','你很能幹，明天幫我接一下小孩。','好，你升級成實驗室總管了。'],
+    bad:['研究慢沒關係，結案報告明天要交。','你有空做研究，怎麼沒空幫我搬家？','這個經費不能買你要的東西，去買 A4 紙。','你們這屆比上一屆難用。','研究的事先放著，我家的冷氣壞了。'],
+    idle:['這週末系上活動，你們去幫忙搬椅子。','計畫期中報告幫我寫一下，我簽名就好。','我家的印表機壞了，誰會修？','國科會要來訪視，實驗室全部打掃一遍。','我太太的公司需要做網站，你們誰會？','我女兒的作業是做火山模型，交給你了。']},
+  {id:'new', r:'R',  name:'新進助理教授型',icon:'hourglass',quote:'我們一起拚 tenure！',desc:'（是他的 tenure）投稿 +1。',pressure:3,stipend:2,prog:1.1,paper:1,decay:2,
+    ok:['太好了！這篇投出去，我的升等就有希望了！','我們一起加油！今晚我也不睡！','這個結果讓我想起我在 Stanford 的日子。','Nice！我們是一個 team！','我要把這張圖印出來貼在辦公室。'],
+    bad:['沒關係！我們一起熬夜！','我的 tenure clock 剩兩年，你懂的。','我這個月被拒了四篇，你不要再讓我難過了。','你知道我升等需要幾篇嗎？我算給你聽。','我們實驗室只有你一個學生，你就是全部的希望。'],
+    idle:['我的辦公室還沒有椅子，我站著上班。','我年資最淺，系上的雜事都是我的。也就是你的。','我用年終獎金買了一張 GPU。','升等過了我就帶大家去日本！','我自己也在寫論文，跟你一起熬。','系主任今天跟我打招呼了，我覺得有希望。']}
 ];
 
 const RELICS = [
@@ -446,8 +582,8 @@ function newState(){
 function progMult(){
   let m = S.school.growth * S.prof.prog;
   if(has('code')||has('hela')) m *= 1.2;
-  if(S.stage==='ms') m *= 1.15;
-  if(S.stage==='phd') m *= .6;
+  if(S.stage==='ms') m *= 1.3;
+  if(S.stage==='phd') m *= .7;
   return m;
 }
 function sanMult(){
@@ -536,9 +672,10 @@ async function roll(stat, dc, label, extra=[]){
   const svg=L.querySelector('.d20'), t=svg.querySelector('text');
   svg.classList.add('spin');
   const n=rnd(1,20);
-  if(!REDUCED){ for(let i=0;i<9;i++){ t.textContent=rnd(1,20); await wait(90); } }
+  if(!REDUCED){ for(let i=0;i<9;i++){ t.textContent=rnd(1,20); Sound.tick(); await wait(90); } }
   t.textContent=n;
   const ok = n===20 || (n!==1 && n+mod>=dc);
+  Sound.chime(ok);
   const txt = n===20?'大成功！':n===1?'大失敗…':ok?'成功':'失敗';
   L.querySelector('.res').innerHTML=`<span class="stamp ${ok?'good':''}">${txt}</span>`;
   await new Promise(r=>{ const t1=setTimeout(r,1700); L.onclick=()=>{clearTimeout(t1);r();}; });
@@ -704,24 +841,24 @@ async function chooseField(){
 }
 
 function admitPct(sc){
-  if(sc.id==='D') return 100;
+  if(sc.tier==='D') return 100;
   return clamp(Math.round(sc.base + (S.st.skill+S.st.talk+S.st.luck-19)*3 + (perk('rec')?12:0)), 3, 95);
 }
 async function applySchools(){
-  const picks=[];
+  const MAX=5, picks=[];
   const draw=()=>{
-    ui(`<div class="scene-h"><h2>推甄志願表</h2><span class="muted">依序點選，最多填三個。全部落榜也不用怕，最後一列保證收你。</span></div>
+    ui(`<div class="scene-h"><h2>推甄志願表</h2><span class="muted">最多報名 ${MAX} 間，每間各自放榜。上了好幾間的話，可以自己挑一間報到。全部落榜也不用怕，最後一列保證收你。</span></div>
       <div class="form"><table>
-        <thead><tr><th>志願</th><th>學校</th><th>校訓</th><th>錄取率</th><th>資源 / 壓力</th></tr></thead>
-        <tbody>${SCHOOLS.map(sc=>{const i=picks.indexOf(sc.id);const fixed=sc.id==='D';
-          return `<tr class="${fixed?'fixed':'row'}" data-v="${sc.id}"><td><span class="slot">${fixed?'保':i>=0?i+1:''}</span></td>
+        <thead><tr><th>報名</th><th>學校</th><th>校訓</th><th>錄取率</th><th>資源 / 壓力</th></tr></thead>
+        <tbody>${SCHOOLS.map(sc=>{const on=picks.includes(sc.id);const fixed=sc.tier==='D';
+          return `<tr class="${fixed?'fixed':'row'}" data-v="${sc.id}"><td><span class="slot">${fixed?'保':on?'✓':''}</span></td>
           <td class="tier">${sc.name}</td><td>${sc.motto}</td><td class="pct">${admitPct(sc)}%</td>
-          <td>${'★'.repeat(5-'SABCD'.indexOf(sc.id))}${'☆'.repeat('SABCD'.indexOf(sc.id))} / ${'🔥'.repeat(sc.pressure)}</td></tr>`}).join('')}</tbody>
+          <td>${'★'.repeat(sc.stars)}${'☆'.repeat(5-sc.stars)} / ${'🔥'.repeat(sc.pressure)}</td></tr>`}).join('')}</tbody>
       </table></div>
-      <div class="btns"><button class="btn ghost" id="clr">清除重填</button><button class="btn primary" id="go" ${picks.length?'':'disabled'}>送出志願，等放榜 →</button></div>`, true);
+      <div class="btns"><button class="btn ghost" id="clr">清除重填</button><button class="btn primary" id="go" ${picks.length?'':'disabled'}>送出 ${picks.length} 間，等放榜 →</button></div>`, true);
     document.querySelectorAll('tr.row').forEach(tr=>tr.onclick=()=>{
       const id=tr.dataset.v, i=picks.indexOf(id);
-      if(i>=0) picks.splice(i,1); else if(picks.length<3) picks.push(id);
+      if(i>=0) picks.splice(i,1); else if(picks.length<MAX) picks.push(id);
       draw();
     });
     $('#clr').onclick=()=>{ picks.length=0; draw(); };
@@ -731,9 +868,10 @@ async function applySchools(){
 
   ui(`<div class="scene-h"><h2>放榜</h2><span class="muted">按 F5 的手在發抖</span></div><div class="results" id="res"></div><div class="btns" id="after"></div>`, true);
   const res=$('#res');
-  let got=null;
-  for(const id of picks){
-    const sc=SCHOOLS.find(s=>s.id===id), p=admitPct(sc);
+  const admitted=[];
+  const order=SCHOOLS.filter(s=>picks.includes(s.id));
+  for(const sc of order){
+    const p=admitPct(sc);
     const row=document.createElement('div'); row.className='resrow';
     row.innerHTML=`<span class="nm">${sc.name}</span><span class="muted">錄取率 ${p}%</span><span class="num roller">…</span><span class="out"></span>`;
     res.appendChild(row);
@@ -743,17 +881,26 @@ async function applySchools(){
     r.textContent=`擲出 ${v}`;
     const ok=v<=p;
     row.querySelector('.out').innerHTML=`<span class="stamp ${ok?'good':''}">${ok?'錄取':'落榜'}</span>`;
-    await wait(650);
-    if(ok){ got=sc; break; }
+    await wait(500);
+    if(ok) admitted.push(sc);
   }
-  if(!got){
-    got=SCHOOLS[4];
+  if(!admitted.length){
+    const d=SCHOOLS.find(s=>s.tier==='D');
     const row=document.createElement('div'); row.className='resrow';
-    row.innerHTML=`<span class="nm">${got.name}</span><span class="muted">備取最後一名…</span><span class="out"><span class="stamp good">遞補上了！</span></span>`;
+    row.innerHTML=`<span class="nm">${d.name}</span><span class="muted">備取最後一名…</span><span class="out"><span class="stamp good">遞補上了！</span></span>`;
     res.appendChild(row); await wait(600);
+    admitted.push(d);
+  }
+  let got=admitted[0];
+  if(admitted.length>1){
+    $('#after').innerHTML=`<p style="width:100%">你上了 <b class="hl">${admitted.length} 間</b>！${admitted.length>=4?'推甄之神降臨。':'選一間去報到吧。'}</p>
+      <div class="cards" style="width:100%">${admitted.map((sc,i)=>`<button class="note" data-i="${i}" style="--r:${tilt()};--c:${NOTE_COLORS[i%5]};--d:${i*.07}s">
+        ${icon('cap')}<h3>${sc.name}</h3><span class="flav">${sc.motto}</span>
+        <span class="tags"><span class="tag">資源 ${'★'.repeat(sc.stars)}</span><span class="tag">壓力 ${'🔥'.repeat(sc.pressure)}</span><span class="tag">進度 ×${sc.growth}</span></span></button>`).join('')}</div>`;
+    got=admitted[+await clickOnce($('#after'),'button.note')];
   }
   S.school=got;
-  $('#after').innerHTML=`<p style="width:100%">恭喜考上 <b class="hl">${got.name}</b>！${got.id==='S'?'全家族都在群組轉發了。':got.id==='D'?'山上空氣很好，聽說猴子會搶便當。':'至少有學校念了。'}</p><button class="btn primary" data-v="ok">去找指導教授 →</button>`;
+  $('#after').innerHTML=`<p style="width:100%">決定去 <b class="hl">${got.name}</b> 報到！${got.tier==='S'?'全家族都在群組轉發了。':got.tier==='D'?'山上空氣很好，聽說猴子會搶便當。':pick(['宿舍抽籤也抽中了，好兆頭。','學校附近的便當店有在賣滷肉飯，很重要。','至少有學校念了。'])}</p><button class="btn primary" data-v="ok">去找指導教授 →</button>`;
   await clickOnce($('#after'),'.btn');
 }
 
@@ -796,16 +943,15 @@ const ACTIONS = [
     run:()=>note('寫了三頁，刪了兩頁', pick(['至少檔名從 final.docx 變成 final_v2.docx 了。','你發現最難寫的是 Abstract，第二難的是其他全部。','寫到一半，Word 當掉了。幸好有自動儲存……的上一版。']), gain({prog:rnd(12,18),san:-4}),'paper')},
   {id:'meet',t:'跟教授 meeting',ic:'prof',f:'帶著 slides 和求生意志。',h:['好感↑','精神?'],dice:'嘴砲',st:'MPD',w:3,
     run:async()=>{
-      if(S.prof.id==='fly'&&Math.random()<.5) return note('教授在杜拜','meeting 改成視訊，網路延遲五秒，你們互相說了二十次「你先說」。',gain({favor:3,san:-2}),'plane');
-      if(S.prof.id==='zen') return note('教授不在','門上貼了一張紙條：「加油，我相信你。」',gain({favor:4,san:3}),'beach');
+      if(S.prof.id==='fly'&&Math.random()<.4) return note('教授在國外',pick(['meeting 改成視訊，網路延遲五秒，你們互相說了二十次「你先說」。','教授在杜拜轉機，視訊畫面只有他的鼻孔。','教授在法國，背景有人在拉手風琴，你什麼都聽不到。']),gain({favor:3,san:-2}),'plane');
+      if(S.prof.id==='zen'&&Math.random()<.4) return note('教授不在',pick(['門上貼了一張紙條：「加油，我相信你。」','教授辦公室的燈沒開，桌上有一層灰。','秘書說教授去爬山了，下個月回來。']),gain({favor:4,san:3}),'beach');
       const r=await roll('talk',12,'跟教授報告進度');
-      if(r.ok) return note('教授點頭了！','「嗯，不錯，照這個方向做。」你走出辦公室時腳步都在飄。',gain({favor:10,prog:6}),'prof');
-      if(S.prof.id==='wind') return note('教授指向窗外','「八樓風很大，你去吹一下，想清楚再回來。」',gain({favor:-6,san:ouch(-9)}),'wind');
-      return note('教授沉默了五秒','「所以……你這禮拜到底做了什麼？」',gain({favor:-6,san:ouch(-8)}),'prof');
+      if(r.ok) return note(pick(['教授點頭了！','過關！','教授笑了（罕見）']),`「${pick(S.prof.ok)}」`,gain({favor:10,prog:6}),S.prof.icon);
+      return note(pick(['教授沉默了五秒','空氣凝結了','教授推了推眼鏡']),`「${pick(S.prof.bad)}」`,gain({favor:-6,san:ouch(-8)}),S.prof.icon);
     }},
   {id:'submit',t:()=>F().sub,ic:'devil',f:()=>`把稿子丟進 ${F().venue}，祈禱別遇到 Reviewer 2。`,h:['論文↑','精神?'],dice:'腦力',st:'MPD',w:3,
     run:async()=>{
-      const dc=14+S.school.dc+(S.stage==='phd'?1:S.stage==='pd'?2:0);
+      const dc=12+S.school.dc+(S.stage==='phd'?1:S.stage==='pd'?2:0);
       const r=await roll('skill',dc,`${F().sub}：${F().venue}`,[['教授加持',S.prof.paper],['AI 潤稿',has('ai')?2:0]]);
       if(r.ok) return note('Accept！', pick(['你把錄取信截圖傳到家族群組，阿嬤問你什麼時候畢業。','Minor revision 之後就收了！教授在群組發了一個讚。','三位 reviewer 都說好。你懷疑系統是不是寄錯人了。']), gain({papers:1,prog:10,san:6,favor:8}),'paper');
       return note('Reviewer 2 出現了', pick(['「作者顯然沒有讀過 [Reviewer2 et al., 2019]。」','「這個方法很有趣，但我不喜歡。Reject。」','「建議補做 15 組實驗，期限兩週。」','「英文需要請母語人士潤飾。」（審稿意見本身有三個文法錯誤）']), gain({san:ouch(-11)}),'devil');
@@ -872,7 +1018,7 @@ const ACTIONS = [
   // Postdoc
   {id:'job',t:'投教職',ic:'office',f:'寄出 40 份 CV，每份都改了學校名稱。',h:['結局?'],dice:'論文',st:'D',w:0,
     run:async()=>{
-      const r=await roll(null,26,'等待面試通知',[['論文',S.papers*2],['學校名氣',S.school.job],['嘴砲',Math.floor(S.st.talk/2)],['腦力',Math.floor(S.st.skill/3)]]);
+      const r=await roll(null,27,'等待面試通知',[['論文',S.papers*2],['學校名氣',S.school.job],['嘴砲',Math.floor(S.st.talk/2)],['腦力',Math.floor(S.st.skill/3)]]);
       if(r.ok){ await note('收到聘書了！！','電話那頭說：「歡迎加入我們系。」你掛掉電話後在走廊上跑了一圈。',[], 'office'); throw new EndGame('prof'); }
       return note('感謝函收集中','收到 23 封信：「您非常優秀，但……」你把它們排成一面牆。',gain({san:ouch(-12)}),'mail');
     }},
@@ -926,6 +1072,71 @@ const EVENTS = [
     ['據理力爭',async()=>{const r=await roll('talk',14,'撰寫 rebuttal');return r.ok?note('Reviewer 被說服了','「作者的回覆說服了我。」這是你第一次在現實中看到這句話。',gain({san:5,skill:1})):note('火上加油','Reviewer 2 追加了五組實驗。',gain({san:ouch(-10)}));}]]},
   {id:'boba',ic:'boba',t:'學弟請喝飲料',x:'學弟拿著一杯半糖少冰的珍奶：「學長姐辛苦了。」',o:[
     ['感動收下',()=>note('人間溫暖','你喝完後多活了一個禮拜。',gain({san:7}))]]},
+  // Absurd lab life
+  {id:'pickup',ic:'child',t:'安親班的電話',x:'教授：「我在開會，你幫我去安親班接一下小孩，五點前。」現在是四點五十分。',o:[
+    ['騎 YouBike 衝過去',async()=>{const r=await roll('stamina',12,'五點前抵達安親班');return r.ok?note('準時抵達！','小孩看著你說：「你是爸爸的奴隸嗎？」',gain({favor:10,san:-4})):note('遲到三分鐘','安親班老師用看嫌疑犯的眼神盤問了你二十分鐘。',gain({favor:2,san:-8}));}],
+    ['「老師，我在跑實驗」',()=>note('教授：「好，我找別人。」','隔天學弟被稱讚「很可靠」。',gain({favor:-8}))]]},
+  {id:'fixpc',ic:'gpu',t:'教授的電腦壞了',x:'教授：「我的電腦中毒了，完全沒畫面！你是資訊專家吧？」',o:[
+    ['過去看看',()=>note('修好了','你按了一下螢幕的電源鍵。教授說你是天才，還在系上會議提到你。',gain({favor:8,san:-1}))],
+    ['「老師，我是做研究的」',()=>note('教授：「研究什麼？連電腦都不會修？」','你的學位在教授心中的價值下降了。',gain({favor:-6}))]]},
+  {id:'homepc',ic:'printer',t:'到府服務',x:'教授：「週末來我家一趟，印表機、Wi-Fi、我媽的 LINE、我兒子的 Switch 都怪怪的。」',o:[
+    ['帶著工具箱出發',()=>note('全能技師','你修好了一切，還幫教授的媽媽設定了長輩圖。她送你一袋柳丁。',gain({favor:10,san:-7}))],
+    ['假裝收訊不好',()=>note('「喂？喂？」','你把手機丟進抽屜裡一整個週末。',gain({favor:-5,san:4}))]]},
+  {id:'clean',ic:'fridge',t:'訪視大掃除',x:'國科會明天要來訪視，實驗室亂到委員可能會迷路。',o:[
+    ['認真打掃到半夜',()=>note('煥然一新','你在櫃子後面找到 2014 年的便當，還有一個失蹤的學長。（他只是睡著了）',gain({san:-6,favor:6}))],
+    ['把東西全部塞進櫃子',async()=>{const r=await roll('luck',12,'祈禱委員不開櫃子');return r.ok?note('完美過關','委員稱讚實驗室「很有條理」。',gain({favor:4})):note('櫃子爆開了','三十個紙箱和一隻老鼠在委員面前滾出來。',gain({favor:-10,san:-5}));}]]},
+  {id:'fridge',ic:'fridge',t:'冰箱裡的便當',x:'實驗室冰箱裡有一個放了三個月的便當，表面已經長出新的生態系。',o:[
+    ['默默丟掉',()=>note('功德一件','全實驗室的人都鬆了一口氣，但沒有人承認是誰的。',gain({san:-2,favor:2}))],
+    ['拍照發 Threads',()=>note('爆紅','貼文有 3 萬個讚，有人留言：「這可以發 paper 了吧。」',gain({san:6}))]]},
+  {id:'aircon',ic:'fire',t:'冷氣壞了',x:'實驗室冷氣壞了，室溫 36 度。總務處說「下個月會派人來看」。',o:[
+    ['去教授辦公室「討論研究」',()=>note('避難成功','你在教授辦公室吹了三小時冷氣，順便被交代了五件事。',gain({favor:4,san:-3}))],
+    ['帶電風扇硬撐',()=>note('蒸籠研究室','你的 GPU 和你一起融化了。',gain({san:-6,prog:3}))]]},
+  {id:'power',ic:'bell',t:'全校停電',x:'全校無預警停電，網路、伺服器、咖啡機全部陣亡。',o:[
+    ['跟大家聊天',()=>note('久違的交流','原來坐在你旁邊兩年的人叫小美，而且她也很想畢業。',gain({san:8,prog:-4}))],
+    ['用手機熱點硬做',()=>note('4G 研究員','你用手機寫了 200 字，電量剩 3%。',gain({prog:4,san:-4}))]]},
+  {id:'firedrill',ic:'bell',t:'消防演習',x:'消防演習的警鈴響了三小時，沒有人告訴你什麼時候結束。',o:[
+    ['乖乖下樓集合',()=>note('操場上的研究生','你在操場上遇到三年沒見的同學，他也還沒畢業。',gain({san:4,prog:-3}))],
+    ['戴耳塞繼續寫',()=>note('專注力 MAX','你寫了一整節，但警衛拿手電筒照你。',gain({prog:6,san:-3}))]]},
+  {id:'pigeon',ic:'bird',t:'鴿子入侵',x:'一隻鴿子從窗戶飛進實驗室，在你的鍵盤上留下一坨禮物。',o:[
+    ['趕走牠',async()=>{const r=await roll('stamina',11,'追鴿子');return r.ok?note('趕走了','鴿子飛走前回頭看了你一眼，你覺得被瞧不起了。',gain({san:-2})):note('牠飛進教授辦公室了','教授的 meeting 筆記現在也有禮物了。',gain({favor:-4,san:3}));}],
+    ['收養牠',()=>note('實驗室新成員','你幫牠取名叫「Reviewer 3」。牠每天準時來，比你還勤勞。',gain({san:7}))]]},
+  {id:'dog',ic:'dog',t:'教授的狗',x:'教授把狗帶來實驗室：「牠今天在這裡，你幫忙顧一下。」',o:[
+    ['帶牠去散步',()=>note('最好的一天','狗狗很可愛，你一整天都在笑。教授說牠很喜歡你。',gain({san:9,prog:-3,favor:3}))],
+    ['讓牠自己玩',()=>note('牠咬爛了你的筆記','還好你本來就看不懂自己的筆記。',gain({prog:-5,san:2}))]]},
+  {id:'ticket',ic:'phone',t:'搶票任務',x:'教授：「我女兒想看五月天演唱會，你們幫我搶票，十二點開賣。」',o:[
+    ['全實驗室一起搶',async()=>{const r=await roll('luck',14,'按 F5');return r.ok?note('搶到了！','教授感動到說要幫你寫推薦信。',gain({favor:14})):note('排隊人數：87,421','教授說：「沒關係。」但他的語氣有關係。',gain({favor:-4,san:-3}));}],
+    ['「我網路不好」',()=>note('被看穿了','教授：「你上禮拜不是才說實驗室網路很快？」',gain({favor:-6}))]]},
+  {id:'lottery',ic:'money',t:'系上尾牙抽獎',x:'系上尾牙，主持人喊出你的號碼！',o:[
+    ['衝上台領獎',()=>{const v=rnd(1,3);
+      if(v===1) return note('一台氣炸鍋','你終於可以在實驗室做雞塊了。',gain({money:1,san:6}));
+      if(v===2) return note('系主任親筆簽名論文集','你把它拿來墊螢幕，高度剛剛好。',gain({san:2}));
+      return note('「再讀一年」體驗券','主持人說是開玩笑的。你笑不出來。',gain({san:-5}));}]]},
+  {id:'subteach',ic:'book',t:'代課',x:'教授：「我明天出差，大一微積分你幫我上一下。兩百人。」',o:[
+    ['硬著頭皮上台',async()=>{const r=await roll('talk',12,'站上講台');return r.ok?note('意外地受歡迎','學生在 Dcard 發文：「代課老師比本人好懂。」教授看到了。',gain({skill:1,favor:6,san:-3})):note('被問倒了','學生問你 ε-δ 的定義，你也很想知道。',gain({san:-9}));}],
+    ['「我明天要回診」',()=>note('教授：「什麼病？」','你說了一個你自己也沒聽過的病名。',gain({favor:-5}))]]},
+  {id:'subject',ic:'question',t:'受試者招募',x:'隔壁心理系在招受試者，酬勞 500 元，「只需要盯著一個點看」。',o:[
+    ['報名',()=>note('盯了兩小時','你看著那個點，那個點也看著你。你們之間產生了某種連結。',gain({money:1,san:-2}))],
+    ['不了',()=>note('明智','你繼續盯著你的論文看兩小時，沒有酬勞。',gain({}))]]},
+  {id:'predatory',ic:'mail',t:'熱情的期刊邀稿',x:'「Dear Esteemed Professor，我們的國際頂尖期刊誠摯邀請您投稿，保證 7 天接受，只需 1,500 美金。」',o:[
+    ['投！',()=>note('真的 7 天就接受了','教授看到期刊名稱後，臉色變得跟八樓的風一樣冷。',gain({papers:1,favor:-15,money:-2}))],
+    ['刪除',()=>note('垃圾信 +1','你的信箱還有 312 封一樣的。',gain({san:1}))]]},
+  {id:'delivery',ic:'boba',t:'外送迷航',x:'你叫了外送，外送員找不到工學院三館，打了四通電話給你。',o:[
+    ['下樓接駕',()=>note('第三次下樓','你終於拿到便當，麵已經糊成一塊了。',gain({san:-3}))],
+    ['描述路線',async()=>{const r=await roll('talk',11,'用語言描述迷宮');return r.ok?note('他找到了！','外送員說你可以去當導航。',gain({san:2})):note('他送到了醫學院','有一個醫學生吃了你的雞腿飯。',gain({san:-5,money:-1}));}]]},
+  {id:'mc',ic:'mic',t:'婚禮主持',x:'教授：「我姪女下週結婚，你很會講話，來當主持人吧。」',o:[
+    ['接下麥克風',async()=>{const r=await roll('talk',13,'主持婚禮');return r.ok?note('全場笑翻','新娘的爸爸問你要不要來他公司上班。',gain({favor:10,talk:1})):note('冷場','你在婚禮上講了一個 Reviewer 2 的笑話，只有教授笑了。',gain({favor:3,san:-6}));}],
+    ['推薦學長',()=>note('學長瞪著你','學長從此不再借你 GPU。',gain({favor:-3,san:2}))]]},
+  {id:'seat',ic:'chair',t:'位子被佔了',x:'新來的碩一坐了你的位子，還把你的公仔收進抽屜。',o:[
+    ['委婉地說明',()=>note('碩一很抱歉','他請你喝了一杯咖啡，還問你研究所是不是很輕鬆。',gain({san:2}))],
+    ['乾脆換位子',()=>note('窗邊的位子','原來窗邊陽光這麼好，你已經三年沒曬太陽了。',gain({san:5}))]]},
+  {id:'oral',ic:'cap',t:'學長的口試',x:'學長口試，你負責：買便當、架投影機、錄影、拿雷射筆、在台下點頭。',o:[
+    ['全力支援',()=>note('專業工作人員','學長順利畢業，他把實驗室的人體工學椅留給你了……的椅墊。',gain({san:-4,favor:4,skill:1}))]]},
+  {id:'printer',ic:'printer',t:'印表機卡紙',x:'明天要交的報告印到第 37 頁，印表機卡紙了，還發出奇怪的聲音。',o:[
+    ['拍它',async()=>{const r=await roll('luck',10,'物理修復');return r.ok?note('修好了！','科技的盡頭是拍一下。',gain({san:3})):note('它吐出一張全黑的紙','上面隱約有「Reviewer 2」的字樣。',gain({san:-6}));}],
+    ['跑去 7-11 印',()=>note('超商影印達人','你成了附近 7-11 店員最熟悉的客人。',gain({money:-1,san:-2}))]]},
+  {id:'group',ic:'phone',t:'實驗室群組改名了',x:'實驗室 Line 群組被教授改名為「XX Lab 24hr 不打烊 💪」。',o:[
+    ['按讚',()=>note('沒得選','群組裡的每個人都按了讚，每個人都在心裡流淚。',gain({san:-4,favor:2}))],
+    ['把群組設成靜音',()=>note('世界清靜了','直到你錯過了明天 7 點的 meeting。',gain({san:5,favor:-5}))]]},
   // CS
   {id:'google',ic:'gpu',fd:'cs',t:'被大公司先發了',x:'Google 剛發表了跟你一樣的方法，用了 4096 張 TPU。',o:[
     ['轉題目',()=>note('重新開始','你從頭讀起，但這次讀得比較快。',gain({prog:-12,skill:1}))],
@@ -1007,7 +1218,8 @@ function drawCards(){
   const pool=ACTIONS.filter(a=>a.st.includes({ms:'M',phd:'P',pd:'D'}[S.stage]) && (!a.fd||a.fd===S.field) && a.w>0);
   const out=[];
   if(S.stage==='pd') out.push(ACTIONS.find(a=>a.id==='job'));
-  const bag=[...pool];
+  if(S.stage==='phd' && S.prog>=70 && S.papers<2) out.push(ACTIONS.find(a=>a.id==='submit'));
+  const bag=pool.filter(a=>!out.includes(a));
   while(out.length<3 && bag.length){
     const tot=bag.reduce((s,a)=>s+a.w,0); let x=Math.random()*tot;
     const i=bag.findIndex(a=>(x-=a.w)<0);
@@ -1047,7 +1259,7 @@ async function semesterEnd(){
   const regen=(has('coffee')?4:0)+(has('chair')?3:0)+(has('cat')?5:0);
   const press=S.school.pressure+S.prof.pressure;
   const ds=gain({money:inc-cost, san:regen-press, favor:-S.prof.decay});
-  await note(`${semName()} 結束`, `生活費 −${cost} 萬，${pd?'薪水':'助學金'} +${inc} 萬。${S.school.name}的壓力加上${S.prof.name}教授的關愛，精神${press-regen>0?'又被磨掉一些':'居然恢復了'}。`, ds, 'hourglass');
+  await note(`${semName()} 結束`, `教授在期末說：「${pick(S.prof.idle)}」<br><span class="muted">生活費 −${cost} 萬，${pd?'薪水':'助學金'} +${inc} 萬。${S.school.name}的壓力加上教授的關愛，精神${press-regen>0?'又被磨掉一些':'居然恢復了'}。</span>`, ds, 'hourglass');
   checkFail();
 }
 
@@ -1069,7 +1281,7 @@ function committeeSVG(mood=0){
     <path class="line" d="M180 130h60" /><text x="210" y="140" text-anchor="middle" style="font:700 12px var(--hand);fill:#1f2d4a">口試委員</text></svg>`;
 }
 async function boss(kind){
-  const cfg={ms:{n:'碩士學位口試',dc:12},qual:{n:'博士資格考',dc:14},phd:{n:'博士學位口試',dc:15}}[kind];
+  const cfg={ms:{n:'碩士學位口試',dc:10},qual:{n:'博士資格考',dc:12},phd:{n:'博士學位口試',dc:13}}[kind];
   const dc=cfg.dc+S.school.dc;
   await modal(`<p class="muted">BOSS</p><h2>${cfg.n}</h2><p>三位委員會輪流發問，答對兩題就過關。答題方式會決定你擲骰用哪個屬性。</p>`, ['深呼吸，上吧'], false, 'prof');
   const qs=shuffle([...QS.all,...QS[S.field]]).slice(0,3);
@@ -1149,7 +1361,7 @@ async function play(){
     S.sem++; S.total++;
     refresh();
     for(let step=0;step<2;step++) await playAction(step);
-    if(Math.random()<.6) await randomEvent();
+    if(Math.random()<.75) await randomEvent();
     await semesterEnd();
     await milestones();
   }
@@ -1194,6 +1406,19 @@ async function run(){
     else { console.error(e); throw e; }
   }
 }
+
+/* sound starts on the first tap (browsers block audio before any interaction) */
+$('#snd').setAttribute('aria-pressed',String(Sound.on));
+$('#snd').onclick=()=>Sound.set(!Sound.on);
+document.addEventListener('pointerdown',function first(e){
+  if(e.target.closest('#snd')) return;
+  document.removeEventListener('pointerdown',first);
+  if(Sound.on) Sound.start();
+});
+document.addEventListener('visibilitychange',()=>{
+  if(!Sound.ctx) return;
+  if(document.hidden) Sound.ctx.suspend(); else if(Sound.on) Sound.ctx.resume();
+});
 
 title();
 </script>
